@@ -238,14 +238,20 @@
         </div>
     </div>
     
-    <!-- Telegram Settings Modal -->
+    <!-- Settings Modal -->
     <div id="settingsModal" class="settings-modal">
         <div class="settings-content">
-            <h3>⚙️ Telegram Settings</h3>
-            <label>Bot Token:</label>
+            <h3>⚙️ App Settings</h3>
+            
+            <label>Admin Password:</label>
+            <input type="text" id="adminPassInput" placeholder="Default: 123456">
+
+            <label>Telegram Bot Token:</label>
             <input type="text" id="tgTokenInput" placeholder="e.g. 123456789:ABCDefghIJKLmn...">
-            <label>Chat ID:</label>
+            
+            <label>Telegram Chat ID:</label>
             <input type="text" id="tgChatIdInput" placeholder="e.g. 123456789 or -100987654321">
+            
             <div style="margin-top: 15px; text-align: right;">
                 <button onclick="closeSettings()" style="background:#e74c3c; color:white; border:none; padding:8px 12px; border-radius:4px; margin-right:10px; cursor:pointer;">Cancel</button>
                 <button onclick="saveSettings()" style="background:#27ae60; color:white; border:none; padding:8px 12px; border-radius:4px; cursor:pointer;">Save Setup</button>
@@ -277,6 +283,7 @@
         <table class="info-table">
             <tr>
                 <td>JOB NO:</td><td><input type="text" id="infoJobNo" class="info-input"></td>
+                <!-- Marking Photo Box Area -->
                 <td rowspan="6" style="text-align: center; vertical-align: top; background: #eee; width: 120px; padding: 5px; font-size:12px;">
                     <b>MARKING</b>
                     <div class="img-upload-box" onclick="triggerMarkingInput()">
@@ -424,9 +431,12 @@
     </div>
 
     <script>
-        // --- Password Logic ---
-        const ADMIN_PASS = "123456"; 
+        // --- Password & Auth Logic ---
         let isAdmin = false;
+
+        function getAdminPass() {
+            return localStorage.getItem('adminPass') || "123456"; // Default password
+        }
 
         function toggleAuth() {
             const authBtn = document.getElementById("authBtn");
@@ -437,8 +447,9 @@
                 authBtn.classList.remove('unlocked');
                 alert("Logged out. App is now in View-Only Mode.");
             } else {
-                let pass = prompt("Enter Admin Password:");
-                if (pass === ADMIN_PASS) {
+                // Changed text here to include the hint
+                let pass = prompt("Enter Admin Password:\n(Hint: Default password is 123456)");
+                if (pass === getAdminPass()) {
                     isAdmin = true;
                     document.body.classList.remove('viewer-mode');
                     authBtn.innerText = "🔓 Admin";
@@ -451,11 +462,12 @@
             }
         }
 
-        // --- Telegram Settings Logic ---
+        // --- Settings Logic (Telegram & Password) ---
         function openSettings() {
             if(!isAdmin) { alert("Please login as Admin to edit Settings."); return; }
             document.getElementById('tgTokenInput').value = localStorage.getItem('tgBotToken') || '';
             document.getElementById('tgChatIdInput').value = localStorage.getItem('tgChatId') || '';
+            document.getElementById('adminPassInput').value = getAdminPass();
             document.getElementById('settingsModal').style.display = 'flex';
         }
         function closeSettings() { document.getElementById('settingsModal').style.display = 'none'; }
@@ -463,10 +475,17 @@
         function saveSettings() {
             localStorage.setItem('tgBotToken', document.getElementById('tgTokenInput').value.trim());
             localStorage.setItem('tgChatId', document.getElementById('tgChatIdInput').value.trim());
+            
+            let newPass = document.getElementById('adminPassInput').value.trim();
+            if(newPass) {
+                localStorage.setItem('adminPass', newPass);
+            }
+            
             closeSettings();
-            alert("Telegram Settings Saved! ⚙️✅");
+            alert("Settings Saved Successfully! ⚙️✅");
         }
 
+        // --- Telegram Backup Logic ---
         async function telegramBackup() {
             let jobsData = localStorage.getItem('cargoJobs');
             if(!jobsData) { alert("No jobs to backup."); return; }
