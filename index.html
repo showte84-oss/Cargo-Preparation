@@ -97,6 +97,7 @@
             width: 100%; box-sizing: border-box; padding: 10px; margin: 8px 0 15px 0;
             border: 1px solid #ccc; border-radius: 4px; font-size: 14px; outline: none;
         }
+        .settings-content input:focus { border-color: #3498db; }
 
         /* Shared Top Header Info */
         .info-section {
@@ -119,6 +120,7 @@
             align-items: center; justify-content: center; border: 1px dashed #999; 
             cursor: pointer; background: #fff; overflow: hidden; position: relative;
         }
+        .img-upload-box:hover { background: #f0f0f0; }
 
         /* Tabs Between Sheets */
         .tab-nav {
@@ -227,8 +229,9 @@
             <div class="app-title">Cargo Log Cloud</div>
         </div>
         <div class="header-right">
+            <!-- Settings Icon -->
             <button id="settingsIconBtn" class="setting-btn" onclick="openSettings()">⚙️</button>
-            <!-- New Share Button -->
+            <!-- Share Button -->
             <button id="shareBtn" class="auth-btn share-btn" style="display: none;" onclick="shareJobLink()">🔗 Share</button>
             
             <select id="jobSelector" class="header-job-select" onchange="loadJob(this.value)">
@@ -238,7 +241,7 @@
         </div>
     </div>
     
-    <!-- Settings Modal -->
+    <!-- Telegram Settings Modal -->
     <div id="settingsModal" class="settings-modal">
         <div class="settings-content">
             <h3>⚙️ App Settings</h3>
@@ -278,6 +281,7 @@
         <table class="info-table">
             <tr>
                 <td>JOB NO:</td><td><input type="text" id="infoJobNo" class="info-input"></td>
+                <!-- Marking Photo Box Area -->
                 <td rowspan="6" style="text-align: center; vertical-align: top; background: #eee; width: 120px; padding: 5px; font-size:12px;">
                     <b>MARKING</b>
                     <div class="img-upload-box" onclick="triggerMarkingInput()">
@@ -352,6 +356,7 @@
                         <th class="col-no load-th">Sr</th>
                         <th class="col-date load-th">Date</th>
                         <th class="col-num load-th">Shift</th>
+                        
                         <th class="col-num load-th std-col-truck">
                             <div style="display:flex; justify-content:space-between; align-items:center; padding: 0 2px;">
                                 <span class="col-name-span" id="truckColName">Truck No</span>
@@ -361,6 +366,7 @@
                                 </div>
                             </div>
                         </th>
+                        
                         <th class="col-num load-th std-col-jumbo">
                             <div style="display:flex; justify-content:space-between; align-items:center; padding: 0 2px;">
                                 <span class="col-name-span" id="jumboColName">Jumbo</span>
@@ -370,6 +376,7 @@
                                 </div>
                             </div>
                         </th>
+                        
                         <th class="col-num load-th std-col-bags">
                             <div style="display:flex; justify-content:space-between; align-items:center; padding: 0 2px;">
                                 <span class="col-name-span" id="bagsColName">50 Kgs Bags</span>
@@ -379,6 +386,7 @@
                                 </div>
                             </div>
                         </th>
+                        
                         <th class="load-th std-col-remark">Remarks</th>
                     </tr>
                 </thead>
@@ -437,7 +445,7 @@
 
 
         // ==========================================
-        // PASSWORD & AUTH LOGIC
+        // PASSWORD & AUTH LOGIC (WITH AUTO-LOGIN)
         // ==========================================
         let isAdmin = false;
 
@@ -446,15 +454,19 @@
         function toggleAuth() {
             const authBtn = document.getElementById("authBtn");
             if (isAdmin) {
+                // Logout Logic
                 isAdmin = false;
+                localStorage.removeItem('savedAdminAuth'); // Remove remembered session
                 document.body.classList.add('viewer-mode');
                 authBtn.innerText = "🔒 Viewer";
                 authBtn.classList.remove('unlocked');
                 alert("Logged out. App is now in View-Only Mode.");
             } else {
+                // Login Logic
                 let pass = prompt("Enter Admin Password:\n(Hint: Default password is 123456)");
                 if (pass === getAdminPass()) {
                     isAdmin = true;
+                    localStorage.setItem('savedAdminAuth', pass); // Remember session
                     document.body.classList.remove('viewer-mode');
                     authBtn.innerText = "🔓 Admin";
                     authBtn.classList.add('unlocked');
@@ -479,7 +491,11 @@
             localStorage.setItem('tgBotToken', document.getElementById('tgTokenInput').value.trim());
             localStorage.setItem('tgChatId', document.getElementById('tgChatIdInput').value.trim());
             let newPass = document.getElementById('adminPassInput').value.trim();
-            if(newPass) localStorage.setItem('adminPass', newPass);
+            if(newPass) {
+                localStorage.setItem('adminPass', newPass);
+                // Re-save auth so auto-login still works with new pass
+                localStorage.setItem('savedAdminAuth', newPass);
+            }
             closeSettings();
             alert("Settings Saved Successfully! ⚙️✅");
         }
@@ -489,15 +505,18 @@
         // ==========================================
         function shareJobLink() {
             if(!currentJobId) return;
-            // Gets current URL, removes existing ?job= parameter, and appends the selected job
             let baseUrl = window.location.href.split('?')[0];
             const url = baseUrl + "?job=" + encodeURIComponent(currentJobId);
             
-            navigator.clipboard.writeText(url).then(() => {
-                alert("Link Copied! \n\n" + url + "\n\nSend this link to your client.");
-            }).catch(err => {
-                alert("Please manually copy this link: \n" + url);
-            });
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(url).then(() => {
+                    alert("Link Copied! \n\n" + url + "\n\nSend this link to your client.");
+                }).catch(err => {
+                    prompt("Auto-copy blocked. Please long press and copy the link below:", url);
+                });
+            } else {
+                prompt("Please long press and copy the link below:", url);
+            }
         }
 
         // ==========================================
@@ -508,24 +527,27 @@
             const targetJob = urlParams.get('job');
             
             if (targetJob) {
-                // Client Viewer Mode via Link
-                isAdmin = false;
-                document.body.classList.add('viewer-mode');
-                
-                // Hide Admin UI elements completely for clients
+                // CLIENT VIEWER MODE
+                isAdmin = false; document.body.classList.add('viewer-mode');
                 document.getElementById('mainMenuToggle').style.display = 'none';
                 document.getElementById('authBtn').style.display = 'none';
                 document.getElementById('settingsIconBtn').style.display = 'none';
                 document.getElementById('jobSelector').style.display = 'none'; 
-                
-                // Setup blank UI and fetch specific job from Firebase
                 for(let i=0; i<10; i++) addPrepRow(); for(let i=0; i<10; i++) addLoadRow();
                 loadJob(targetJob);
-                
             } else {
-                // Normal Admin Start
+                // ADMIN MODE START
+                // Auto-login Check
+                if (localStorage.getItem('savedAdminAuth') === getAdminPass()) {
+                    isAdmin = true;
+                    document.body.classList.remove('viewer-mode');
+                    const authBtn = document.getElementById('authBtn');
+                    authBtn.innerText = "🔓 Admin";
+                    authBtn.classList.add('unlocked');
+                }
+
                 for(let i=0; i<10; i++) addPrepRow(); for(let i=0; i<10; i++) addLoadRow();
-                updateJobDropdown(); // Fetch all jobs from Firebase for Dropdown
+                updateJobDropdown(); 
             }
             setupLongPressPreview();
         };
@@ -852,7 +874,7 @@
                     if(job.loadData) job.loadData.forEach(row => addLoadRow(row)); 
                     
                     updateSummary(); 
-                    document.getElementById('shareBtn').style.display = 'inline-block';
+                    if(isAdmin) document.getElementById('shareBtn').style.display = 'inline-block';
                     document.getElementById("sideMenu").classList.remove("open");
                     document.getElementById("menuOverlay").classList.remove("open");
                 } else {
