@@ -14,27 +14,37 @@
 
         /* Top Header Bar */
         .header-bar {
-            background-color: #2c3e50; color: white; padding: 12px 15px;
+            background-color: #2c3e50; color: white; padding: 10px 12px;
             display: flex; align-items: center; justify-content: space-between;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1); position: relative; z-index: 100;
         }
         .header-left { display: flex; align-items: center; }
-        .header-right { display: flex; align-items: center; gap: 8px; }
+        .header-right { display: flex; align-items: center; gap: 6px; }
         
-        .menu-toggle { background: transparent; border: none; color: white; font-size: 20px; cursor: pointer; font-weight: bold; padding: 0; margin-right: 15px; }
+        .menu-toggle { background: transparent; border: none; color: white; font-size: 20px; cursor: pointer; font-weight: bold; padding: 0; margin-right: 12px; }
         .app-title { font-weight: bold; font-size: 16px; white-space: nowrap; }
-        .setting-btn { background: transparent; border: none; font-size: 20px; cursor: pointer; padding: 0; margin-right: 5px; transition: transform 0.2s; }
+        .setting-btn { background: transparent; border: none; font-size: 20px; cursor: pointer; padding: 0; margin-right: 2px; transition: transform 0.2s; }
         .setting-btn:active { transform: rotate(90deg); }
         
-        .header-job-select { padding: 6px; border-radius: 4px; background-color: #ecf0f1; color: #2c3e50; border: none; font-size: 13px; font-weight: bold; max-width: 140px; cursor: pointer; outline: none; }
+        .header-job-select { padding: 5px; border-radius: 4px; background-color: #ecf0f1; color: #2c3e50; border: none; font-size: 13px; font-weight: bold; max-width: 120px; cursor: pointer; outline: none; }
         
-        .auth-btn { background-color: #e74c3c; color: white; border: none; padding: 6px 12px; border-radius: 4px; font-weight: bold; font-size: 12px; cursor: pointer; white-space: nowrap; }
+        .auth-btn { background-color: #e74c3c; color: white; border: none; padding: 6px 10px; border-radius: 4px; font-weight: bold; font-size: 12px; cursor: pointer; white-space: nowrap; }
         .auth-btn.unlocked { background-color: #27ae60; }
         .share-btn { background-color: #f39c12; }
-        .icon-action-btn { background: transparent; border: none; font-size: 18px; cursor: pointer; padding: 0 4px; transition: transform 0.1s; }
+        .icon-action-btn { background: transparent; border: none; font-size: 18px; cursor: pointer; padding: 0 2px; transition: transform 0.1s; }
         .icon-action-btn:active { transform: scale(0.9); }
 
-        @media (max-width: 400px) { .app-title { display: none; } .header-job-select { max-width: 90px; } .menu-toggle { margin-right: 10px; } }
+        /* Mobile Screen Adjustments (Fix for elements going off-screen) */
+        @media (max-width: 550px) { 
+            .app-title { display: none; } 
+            .header-bar { padding: 8px 4px; } 
+            .header-right { gap: 3px; } 
+            .header-job-select { max-width: 75px; padding: 4px 2px; font-size: 11px; } 
+            .menu-toggle { margin-right: 4px; font-size: 18px; } 
+            .auth-btn { padding: 4px 5px; font-size: 11px; }
+            .setting-btn { font-size: 18px; margin-right: 0; }
+            .icon-action-btn { font-size: 15px; padding: 0 1px; }
+        }
 
         /* Slide-out Menu */
         .side-menu {
@@ -89,7 +99,9 @@
 
         /* Data Section & Tables */
         .data-section { background: white; padding: 5px; margin: 0 5px 5px 5px; overflow-x: auto; border: 1px solid #ccc; border-top: 3px solid #0b57d0; border-radius: 0 0 6px 6px; flex-grow: 1; }
-        .data-table { border-collapse: collapse; width: 100%; min-width: 600px; text-align: center; }
+        
+        .data-table { border-collapse: collapse; width: 100%; min-width: 600px; text-align: center; table-layout: fixed; }
+        
         .data-table th, .data-table td { border: 1px solid #555; padding: 0; height: 32px; vertical-align: middle; box-sizing: border-box; }
         .data-table th { padding: 4px; font-size: 12px; position: relative; }
         .data-table input, .data-table select { width: 100%; height: 100%; box-sizing: border-box; border: none; text-align: center; font-size: 13px; padding: 4px; background: transparent; outline: none; }
@@ -154,12 +166,12 @@
                 <option value="">-- Load Job --</option>
             </select>
             
-            <span id="jobActionBtns" style="display: none; align-items: center; gap: 4px; margin-left: 4px;">
+            <span id="jobActionBtns" style="display: none; align-items: center; gap: 4px;">
                 <button class="icon-action-btn" onclick="renameCurrentJob()" title="Rename Job">✏️</button>
                 <button class="icon-action-btn" onclick="deleteCurrentJob()" title="Delete Job">🗑️</button>
             </span>
 
-            <button id="authBtn" class="auth-btn" style="margin-left: 8px;" onclick="toggleAuth()">🔒 Viewer</button>
+            <button id="authBtn" class="auth-btn" onclick="toggleAuth()">🔒 Viewer</button>
         </div>
     </div>
     
@@ -412,7 +424,6 @@
                 
                 updateJobDropdown();
 
-                // 1. Check Draft (Prevents loss on refresh)
                 let draftStr = localStorage.getItem('cargoDraftState');
                 if(draftStr) {
                     try {
@@ -423,11 +434,10 @@
                         hasUnsavedChanges = true;
                         if(isAdmin && currentJobId) { document.getElementById('shareBtn').style.display = 'inline-block'; document.getElementById('jobActionBtns').style.display = 'flex'; }
                         initResizableColumns();
-                        return; // Successfully restored screen
+                        return;
                     } catch(e){}
                 }
 
-                // 2. Load Last Job if no draft
                 let lastJob = localStorage.getItem('lastActiveJob');
                 if(lastJob) {
                     loadJob(lastJob, true);
@@ -760,7 +770,6 @@
             });
         }
 
-        // CORRECTED RESTORE FUNCTION
         function restoreData(event) {
             if(!isAdmin) { alert("Please login as Admin to restore data."); document.getElementById('restoreFile').value = ""; return; }
             
