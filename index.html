@@ -141,7 +141,7 @@
         }
         .data-table { border-collapse: collapse; width: 100%; min-width: 600px; text-align: center; }
         .data-table th, .data-table td { border: 1px solid #555; padding: 0; height: 32px; vertical-align: middle; box-sizing: border-box; }
-        .data-table th { padding: 4px; font-size: 12px; position: relative; /* For resizer */ }
+        .data-table th { padding: 4px; font-size: 12px; position: relative; }
         
         .data-table input, .data-table select {
             width: 100%; height: 100%; box-sizing: border-box; border: none;
@@ -150,7 +150,6 @@
         .data-table input:focus, .data-table select:focus { background-color: rgba(0, 123, 255, 0.1); }
         .data-table select { text-align-last: center; } 
 
-        /* Action Buttons & Edit Mode */
         .top-action-bar { display: flex; justify-content: flex-end; padding-bottom: 5px; }
         .mode-toggle-btn {
             background: #fff; border: 1px solid #777; padding: 5px 10px; border-radius: 4px;
@@ -168,12 +167,9 @@
             position: absolute; top: 0; right: 0; width: 10px; height: 100%;
             cursor: col-resize; user-select: none; z-index: 10; display: none; 
         }
-        .edit-mode-active .resizer {
-            display: block; background-color: rgba(231, 76, 60, 0.2); border-right: 2px solid #e74c3c;
-        }
+        .edit-mode-active .resizer { display: block; background-color: rgba(231, 76, 60, 0.2); border-right: 2px solid #e74c3c; }
         .resizer:hover, .resizer.resizing { background-color: rgba(231, 76, 60, 0.8); }
 
-        /* Colors */
         .prep-th { background-color: #00b0f0; color: black; font-weight: bold; }
         .output-col { color: red; font-weight: bold; }
         .balance-col { background-color: #00b050; color: white; font-weight: bold; }
@@ -851,8 +847,11 @@
                 document.getElementById('prepTableBody').innerHTML = ""; document.getElementById('loadTableBody').innerHTML = "";
                 removeMarkingImage(); 
                 document.getElementById('shareBtn').style.display = 'none';
-                document.getElementById('jobActionBtns').style.display = 'none'; // Hide edit/delete job icons
+                document.getElementById('jobActionBtns').style.display = 'none'; 
                 
+                // Clear Layout Sizes
+                document.querySelectorAll('.data-table th').forEach(th => { th.style.width = ""; th.style.minWidth = ""; th.style.maxWidth = ""; });
+
                 stdColsState = { truck: { exists: true, name: "Truck No" }, jumbo: { exists: true, name: "Jumbo" }, bags: { exists: true, name: "50 Kgs Bags" } };
                 restoreStdColsUI(); document.querySelectorAll('.dyn-col').forEach(el => el.remove());
                 dynColCount = 0; prepRowCount = 0; loadRowCount = 0;
@@ -862,12 +861,20 @@
         }
 
         function getJobState() {
+            // Capture Dyn Cols
             let loadDynCols = [];
             document.querySelectorAll('#Loading thead th.dyn-col').forEach(th => {
                 let colId = Array.from(th.classList).find(c => c.startsWith('dyn_col_'));
                 let colName = th.querySelector('.col-name-span').innerText;
                 loadDynCols.push({ id: colId, name: colName });
             });
+
+            // Capture Layout Sizes
+            let prepWidths = [];
+            document.querySelectorAll('#prepTableMain th').forEach(th => prepWidths.push(th.style.width || ""));
+            let loadWidths = [];
+            document.querySelectorAll('#loadingTableMain th').forEach(th => loadWidths.push(th.style.width || ""));
+
             let state = {
                 info: {
                     jobNo: document.getElementById('infoJobNo').value, shipper: document.getElementById('infoShipper').value,
@@ -876,7 +883,8 @@
                     prepNotes: document.getElementById('prepNotes').value, loadNotes: document.getElementById('loadNotes').value,
                     markingImage: currentMarkingBase64
                 },
-                stdCols: stdColsState, prepData: [], loadDynCols: loadDynCols, loadData: []
+                stdCols: stdColsState, prepData: [], loadDynCols: loadDynCols, loadData: [],
+                layout: { prepWidths: prepWidths, loadWidths: loadWidths }
             };
             document.getElementById('prepTableBody').querySelectorAll('tr').forEach(r => {
                 state.prepData.push({
@@ -910,7 +918,7 @@
                 currentJobId = jobNo; 
                 updateJobDropdown();
                 document.getElementById('shareBtn').style.display = 'inline-block';
-                document.getElementById('jobActionBtns').style.display = 'flex'; // Show edit/delete job icons
+                document.getElementById('jobActionBtns').style.display = 'flex'; 
                 saveBtn.innerText = "💾 SAVE TO CLOUD";
                 alert("Job Saved to Cloud Successfully! ☁️✅");
                 toggleMenu();
@@ -972,14 +980,39 @@
                     if(job.loadData) job.loadData.forEach(row => addLoadRow(row)); 
                     
                     updateSummary(); 
+
+                    // Restore Layout Sizes
+                    if (job.layout) {
+                        if (job.layout.prepWidths) {
+                            document.querySelectorAll('#prepTableMain th').forEach((th, i) => {
+                                if (job.layout.prepWidths[i]) {
+                                    th.style.width = job.layout.prepWidths[i];
+                                    th.style.minWidth = job.layout.prepWidths[i];
+                                    th.style.maxWidth = job.layout.prepWidths[i];
+                                } else { th.style.width = ""; th.style.minWidth = ""; th.style.maxWidth = ""; }
+                            });
+                        }
+                        if (job.layout.loadWidths) {
+                            document.querySelectorAll('#loadingTableMain th').forEach((th, i) => {
+                                if (job.layout.loadWidths[i]) {
+                                    th.style.width = job.layout.loadWidths[i];
+                                    th.style.minWidth = job.layout.loadWidths[i];
+                                    th.style.maxWidth = job.layout.loadWidths[i];
+                                } else { th.style.width = ""; th.style.minWidth = ""; th.style.maxWidth = ""; }
+                            });
+                        }
+                    } else {
+                        document.querySelectorAll('.data-table th').forEach(th => { th.style.width = ""; th.style.minWidth = ""; th.style.maxWidth = ""; });
+                    }
+
                     if(isAdmin) {
                         document.getElementById('shareBtn').style.display = 'inline-block';
-                        document.getElementById('jobActionBtns').style.display = 'flex'; // Show edit/delete job icons
+                        document.getElementById('jobActionBtns').style.display = 'flex'; 
                     }
                     document.getElementById("sideMenu").classList.remove("open");
                     document.getElementById("menuOverlay").classList.remove("open");
                     
-                    initResizableColumns(); // Re-init resizers after loading
+                    initResizableColumns(); 
                 } else {
                     alert("Job not found in Cloud Database.");
                 }
@@ -1023,6 +1056,8 @@
                     prepRowCount = 0; loadRowCount = 0;
                     for(let i=0; i<10; i++) addPrepRow(); 
                     for(let i=0; i<10; i++) addLoadRow();
+                    
+                    document.querySelectorAll('.data-table th').forEach(th => { th.style.width = ""; th.style.minWidth = ""; th.style.maxWidth = ""; });
                     
                     updateJobDropdown();
                     document.getElementById('shareBtn').style.display = 'none';
