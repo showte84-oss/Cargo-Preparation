@@ -15,9 +15,6 @@
             background-color: #f4f4f9; display: flex; flex-direction: column; height: 100vh;
         }
 
-        /* Warning Banner */
-        #noDbWarning { background-color: #e74c3c; color: white; text-align: center; padding: 8px; font-size: 13px; font-weight: bold; display: none; }
-
         /* Top Header Bar */
         .header-bar {
             background-color: #2c3e50; color: white; padding: 12px 15px;
@@ -27,29 +24,48 @@
         .header-left { display: flex; align-items: center; }
         .header-right { display: flex; align-items: center; gap: 8px; }
         
-        .menu-toggle { background: transparent; border: none; color: white; font-size: 20px; cursor: pointer; font-weight: bold; padding: 0; margin-right: 15px; }
+        .menu-toggle {
+            background: transparent; border: none; color: white;
+            font-size: 20px; cursor: pointer; font-weight: bold; padding: 0; margin-right: 15px;
+        }
         .app-title { font-weight: bold; font-size: 16px; white-space: nowrap; }
         
-        .setting-btn { background: transparent; border: none; font-size: 20px; cursor: pointer; padding: 0; margin-right: 5px; transition: transform 0.2s; }
+        .setting-btn {
+            background: transparent; border: none; font-size: 20px; cursor: pointer;
+            padding: 0; margin-right: 5px; transition: transform 0.2s;
+        }
         .setting-btn:active { transform: rotate(90deg); }
         
-        .header-job-select { padding: 6px; border-radius: 4px; background-color: #ecf0f1; color: #2c3e50; border: none; font-size: 13px; font-weight: bold; max-width: 140px; cursor: pointer; outline: none; }
+        .header-job-select {
+            padding: 6px; border-radius: 4px; background-color: #ecf0f1; color: #2c3e50;
+            border: none; font-size: 13px; font-weight: bold; max-width: 140px; cursor: pointer; outline: none;
+        }
         
-        .auth-btn { background-color: #e74c3c; color: white; border: none; padding: 6px 12px; border-radius: 4px; font-weight: bold; font-size: 12px; cursor: pointer; white-space: nowrap; }
+        .auth-btn {
+            background-color: #e74c3c; color: white; border: none; padding: 6px 12px;
+            border-radius: 4px; font-weight: bold; font-size: 12px; cursor: pointer; white-space: nowrap;
+        }
         .auth-btn.unlocked { background-color: #27ae60; }
         .share-btn { background-color: #f39c12; }
 
-        @media (max-width: 400px) { .app-title { display: none; } .header-job-select { max-width: 90px; } .menu-toggle { margin-right: 10px; } }
+        @media (max-width: 400px) {
+            .app-title { display: none; }
+            .header-job-select { max-width: 90px; }
+            .menu-toggle { margin-right: 10px; }
+        }
 
         /* Slide-out Menu */
         .side-menu {
             position: fixed; top: 0; left: -260px; width: 220px; height: 100%;
             background-color: #34495e; padding: 20px; transition: left 0.3s ease;
             z-index: 1000; display: flex; flex-direction: column; gap: 12px;
-            box-shadow: 2px 0 5px rgba(0,0,0,0.2); overflow-y: auto;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.2);
         }
         .side-menu.open { left: 0; }
-        .side-menu button { padding: 10px; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 14px; text-align: left; }
+        .side-menu button {
+            padding: 10px; color: white; border: none; border-radius: 4px; 
+            cursor: pointer; font-weight: bold; font-size: 14px; text-align: left;
+        }
         .side-menu button:hover { opacity: 0.9; }
         .menu-close { background: transparent !important; color: #e74c3c !important; text-align: right !important; margin-bottom: 10px; cursor: pointer; }
         
@@ -60,60 +76,97 @@
         .btn-backup-tg { background-color: #3498db; }
         .btn-restore { background-color: #d35400; }
 
-        .overlay { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.5); z-index: 999; display: none; }
+        .overlay {
+            position: fixed; top:0; left:0; width:100%; height:100%; 
+            background: rgba(0,0,0,0.5); z-index: 999; display: none;
+        }
         .overlay.open { display: block; }
 
-        /* Settings Modal (Updated for scrolling) */
+        /* Settings Modal */
         .settings-modal {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.6); z-index: 2000; justify-content: center; align-items: center;
         }
         .settings-content {
-            background: white; padding: 20px; border-radius: 8px; width: 90%; max-width: 400px;
-            max-height: 85vh; overflow-y: auto; box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            background: white; padding: 20px; border-radius: 8px; width: 90%; max-width: 350px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
         }
         .settings-content h3 { margin-top: 0; font-size: 18px; color: #2c3e50; }
-        .settings-content label { font-size: 12px; font-weight: bold; color: #555; display: block; margin-top: 10px;}
+        .settings-content label { font-size: 13px; font-weight: bold; color: #555; }
         .settings-content input {
-            width: 100%; box-sizing: border-box; padding: 8px; margin: 4px 0 5px 0;
-            border: 1px solid #ccc; border-radius: 4px; font-size: 13px; outline: none;
+            width: 100%; box-sizing: border-box; padding: 10px; margin: 8px 0 15px 0;
+            border: 1px solid #ccc; border-radius: 4px; font-size: 14px; outline: none;
         }
-        .settings-content input:focus, .settings-content textarea:focus { border-color: #3498db; }
-        .settings-content hr { border: 0; border-top: 1px solid #ddd; margin: 15px 0; }
+        .settings-content input:focus { border-color: #3498db; }
 
         /* Shared Top Header Info */
-        .info-section { background: white; padding: 5px; margin: 10px 5px 5px 5px; border: 1px solid #ccc; border-radius: 4px; }
+        .info-section {
+            background: white; padding: 5px; margin: 10px 5px 5px 5px; 
+            border: 1px solid #ccc; border-radius: 4px;
+        }
         .info-table { border-collapse: collapse; width: 100%; }
         .info-table td { border: 1px solid #999; padding: 0; }
-        .info-table td:first-child { font-weight: bold; width: 80px; background-color: #f1f5f8; padding: 5px; font-size: 12px; white-space: nowrap; }
-        .info-input { width: 100%; box-sizing: border-box; border: none; padding: 8px 5px; outline: none; font-size: 14px; font-family: inherit; }
+        .info-table td:first-child {
+            font-weight: bold; width: 80px; background-color: #f1f5f8;
+            padding: 5px; font-size: 12px; white-space: nowrap;
+        }
+        .info-input {
+            width: 100%; box-sizing: border-box; border: none;
+            padding: 8px 5px; outline: none; font-size: 14px; font-family: inherit;
+        }
         
-        .img-upload-box { margin-top: 5px; width: 100%; min-height: 80px; display: flex; align-items: center; justify-content: center; border: 1px dashed #999; cursor: pointer; background: #fff; overflow: hidden; position: relative; }
+        .img-upload-box {
+            margin-top: 5px; width: 100%; min-height: 80px; display: flex; 
+            align-items: center; justify-content: center; border: 1px dashed #999; 
+            cursor: pointer; background: #fff; overflow: hidden; position: relative;
+        }
         .img-upload-box:hover { background: #f0f0f0; }
 
         /* Tabs Between Sheets */
-        .tab-nav { display: flex; background-color: #e0e0e0; padding: 5px 5px 0 5px; gap: 4px; margin: 5px 5px 0 5px; border-radius: 6px 6px 0 0; border: 1px solid #ccc; border-bottom: none; }
-        .tab-btn { background-color: #f9f9f9; color: #555; border: 1px solid #ccc; border-bottom: none; padding: 8px 12px; font-size: 13px; font-weight: bold; cursor: pointer; border-radius: 4px 4px 0 0; flex-grow: 1; text-align: center; }
+        .tab-nav {
+            display: flex; background-color: #e0e0e0; padding: 5px 5px 0 5px; gap: 4px;
+            margin: 5px 5px 0 5px; border-radius: 6px 6px 0 0; border: 1px solid #ccc; border-bottom: none;
+        }
+        .tab-btn {
+            background-color: #f9f9f9; color: #555; border: 1px solid #ccc; border-bottom: none;
+            padding: 8px 12px; font-size: 13px; font-weight: bold; cursor: pointer;
+            border-radius: 4px 4px 0 0; flex-grow: 1; text-align: center;
+        }
         .tab-btn.active { background-color: #0b57d0; color: white; border-color: #0b57d0; }
 
         /* Data Section & Tables */
-        .data-section { background: white; padding: 5px; margin: 0 5px 5px 5px; overflow-x: auto; border: 1px solid #ccc; border-top: 3px solid #0b57d0; border-radius: 0 0 6px 6px; flex-grow: 1; }
+        .data-section {
+            background: white; padding: 5px; margin: 0 5px 5px 5px; overflow-x: auto;
+            border: 1px solid #ccc; border-top: 3px solid #0b57d0; border-radius: 0 0 6px 6px; flex-grow: 1;
+        }
         .data-table { border-collapse: collapse; width: 100%; min-width: 600px; text-align: center; }
         .data-table th, .data-table td { border: 1px solid #555; padding: 0; height: 32px; vertical-align: middle; box-sizing: border-box; }
         .data-table th { padding: 4px; font-size: 12px; position: relative; }
-        .data-table input, .data-table select { width: 100%; height: 100%; box-sizing: border-box; border: none; text-align: center; font-size: 13px; padding: 4px; background: transparent; outline: none; }
+        
+        .data-table input, .data-table select {
+            width: 100%; height: 100%; box-sizing: border-box; border: none;
+            text-align: center; font-size: 13px; padding: 4px; background: transparent; outline: none;
+        }
         .data-table input:focus, .data-table select:focus { background-color: rgba(0, 123, 255, 0.1); }
         .data-table select { text-align-last: center; } 
 
         .top-action-bar { display: flex; justify-content: flex-end; padding-bottom: 5px; }
-        .mode-toggle-btn { background: #fff; border: 1px solid #777; padding: 5px 10px; border-radius: 4px; font-size: 12px; font-weight: bold; cursor: pointer; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        .mode-toggle-btn {
+            background: #fff; border: 1px solid #777; padding: 5px 10px; border-radius: 4px;
+            font-size: 12px; font-weight: bold; cursor: pointer; box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
         .mode-toggle-btn.active { background: #e74c3c; color: white; border-color: #c0392b; }
+        
         .col-action-btns { display: none; gap: 2px; flex-shrink: 0; }
         .edit-mode-active .col-action-btns { display: flex; }
         .icon-btn { padding: 2px 4px; font-size: 11px; cursor: pointer; background: white; border: 1px solid #999; border-radius: 3px; }
         .icon-btn-del { color: red; }
 
-        .resizer { position: absolute; top: 0; right: 0; width: 10px; height: 100%; cursor: col-resize; user-select: none; z-index: 10; display: none; }
+        /* Draggable Column Resizer */
+        .resizer {
+            position: absolute; top: 0; right: 0; width: 10px; height: 100%;
+            cursor: col-resize; user-select: none; z-index: 10; display: none; 
+        }
         .edit-mode-active .resizer { display: block; background-color: rgba(231, 76, 60, 0.2); border-right: 2px solid #e74c3c; }
         .resizer:hover, .resizer.resizing { background-color: rgba(231, 76, 60, 0.8); }
 
@@ -125,7 +178,10 @@
         .load-green-col { background-color: lime; color: black; font-weight: bold; }
 
         .notes-section { margin-top: 10px; }
-        .notes-section textarea { width: 100%; height: 80px; padding: 8px; border: 1px solid #ccc; box-sizing: border-box; font-size: 13px; font-family: inherit; }
+        .notes-section textarea {
+            width: 100%; height: 80px; padding: 8px; border: 1px solid #ccc;
+            box-sizing: border-box; font-size: 13px; font-family: inherit;
+        }
         .tab-content { display: none; }
         .tab-content.active { display: block; }
         
@@ -134,39 +190,64 @@
         .btn-add-col { background-color: #008CBA; }
         .btn-delete { padding: 8px 12px; background-color: #e74c3c; color: white; border: none; cursor: pointer; border-radius: 4px; font-weight: bold; font-size: 12px; }
         
-        .col-no { width: 40px; } .col-date { width: 80px; } .col-num { width: 70px; } .hidden-col { display: none !important; }
+        .col-no { width: 40px; }
+        .col-date { width: 80px; }
+        .col-num { width: 70px; }
+        .hidden-col { display: none !important; }
 
         /* VIEWER (READ-ONLY) MODE RESTRICTIONS */
-        body.viewer-mode .btn-add, body.viewer-mode .btn-delete, body.viewer-mode .top-action-bar,
-        body.viewer-mode .btn-new, body.viewer-mode .btn-save, body.viewer-mode .btn-saveas,
-        body.viewer-mode #removeMarkingBtn, body.viewer-mode #settingsIconBtn,
-        body.viewer-mode #shareBtn, body.viewer-mode #jobActionBtns { display: none !important; }
-        body.viewer-mode .info-input, body.viewer-mode .data-table input, body.viewer-mode .data-table select, body.viewer-mode .notes-section textarea { pointer-events: none; color: #000; -webkit-appearance: none; -moz-appearance: none; appearance: none; }
+        body.viewer-mode .btn-add,
+        body.viewer-mode .btn-delete,
+        body.viewer-mode .top-action-bar,
+        body.viewer-mode .btn-new,
+        body.viewer-mode .btn-save,
+        body.viewer-mode .btn-saveas,
+        body.viewer-mode #removeMarkingBtn,
+        body.viewer-mode #settingsIconBtn,
+        body.viewer-mode #shareBtn,
+        body.viewer-mode #jobActionBtns {
+            display: none !important;
+        }
+        
+        body.viewer-mode .info-input,
+        body.viewer-mode .data-table input,
+        body.viewer-mode .data-table select,
+        body.viewer-mode .notes-section textarea {
+            pointer-events: none; color: #000;
+            -webkit-appearance: none; -moz-appearance: none; appearance: none;
+        }
         body.viewer-mode .img-upload-box { cursor: default; }
 
         /* Full Text Preview Popup */
-        .full-text-preview { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: rgba(33, 47, 61, 0.95); color: #fff; padding: 20px 30px; border-radius: 8px; font-size: 18px; font-weight: bold; text-align: center; z-index: 10000; box-shadow: 0 10px 25px rgba(0,0,0,0.4); max-width: 85%; word-wrap: break-word; pointer-events: none; }
+        .full-text-preview {
+            display: none; position: fixed; top: 50%; left: 50%;
+            transform: translate(-50%, -50%); background-color: rgba(33, 47, 61, 0.95);
+            color: #fff; padding: 20px 30px; border-radius: 8px; font-size: 18px;
+            font-weight: bold; text-align: center; z-index: 10000;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.4); max-width: 85%;
+            word-wrap: break-word; pointer-events: none; 
+        }
     </style>
 </head>
 <body class="viewer-mode">
 
-    <!-- Warning Banner -->
-    <div id="noDbWarning">⚠️ Database Not Connected! Click ⚙️ to enter Firebase & GitHub settings.</div>
-
-    <!-- Header -->
+    <!-- Header & Hidden Menu -->
     <div class="header-bar">
         <div class="header-left">
             <button class="menu-toggle" id="mainMenuToggle" onclick="toggleMenu()">☰</button>
             <div class="app-title">Cargo Log Cloud</div>
         </div>
         <div class="header-right">
+            <!-- Settings Icon -->
             <button id="settingsIconBtn" class="setting-btn" onclick="openSettings()">⚙️</button>
+            <!-- Share Button -->
             <button id="shareBtn" class="auth-btn share-btn" style="display: none;" onclick="shareJobLink()">🔗 Share</button>
             
             <select id="jobSelector" class="header-job-select" onchange="loadJob(this.value)">
                 <option value="">-- Load Job --</option>
             </select>
             
+            <!-- Edit / Delete Job Buttons -->
             <span id="jobActionBtns" style="display: none; align-items: center; gap: 2px; margin-left: 4px;">
                 <button style="background: none; border: none; cursor: pointer; font-size: 16px; padding: 0;" onclick="renameCurrentJob()" title="Rename Job">✏️</button>
                 <button style="background: none; border: none; cursor: pointer; font-size: 16px; padding: 0;" onclick="deleteCurrentJob()" title="Delete Job">🗑️</button>
@@ -176,53 +257,25 @@
         </div>
     </div>
     
-    <!-- Comprehensive Settings Modal -->
+    <!-- Telegram Settings Modal -->
     <div id="settingsModal" class="settings-modal">
         <div class="settings-content">
             <h3>⚙️ App Settings</h3>
-            
             <label>Admin Password:</label>
             <input type="text" id="adminPassInput" placeholder="Default: 123456">
+            <label>Telegram Bot Token:</label>
+            <input type="text" id="tgTokenInput" placeholder="e.g. 123456789:ABCDefghIJKLmn...">
+            <label>Telegram Chat ID:</label>
+            <input type="text" id="tgChatIdInput" placeholder="e.g. 123456789 or -100987654321">
             
-            <hr>
-            <h4 style="margin:10px 0 0 0; color:#e74c3c;">🔌 Database Setup (Firebase)</h4>
-            <p style="font-size:11px; color:#666; margin: 2px 0 10px 0;">Enter your Firebase Config to make this app independent.</p>
-            
-            <!-- AUTO FILL SECTION -->
-            <div style="background-color: #f8f9fa; padding: 10px; border-radius: 6px; border: 1px dashed #bdc3c7; margin-bottom: 10px;">
-                <label style="color: #2980b9; margin-top: 0;">⚡ Fast Setup: Paste full firebaseConfig code here</label>
-                <textarea id="fbConfigPaste" rows="4" style="width: 100%; box-sizing: border-box; padding: 8px; font-family: monospace; font-size: 11px; margin: 5px 0; border: 1px solid #ccc; border-radius: 4px;" placeholder="const firebaseConfig = {&#10;  apiKey: '...',&#10;  authDomain: '...',&#10;  ...&#10;};"></textarea>
-                <button onclick="autoFillFirebaseConfig()" style="background:#3498db; color:white; border:none; padding:8px 10px; border-radius:4px; font-weight: bold; font-size: 12px; cursor:pointer; width: 100%;">Auto-Fill Fields Below</button>
-            </div>
-
-            <label>apiKey:</label> <input type="text" id="fbApiKey" placeholder="AIzaSy...">
-            <label>authDomain:</label> <input type="text" id="fbAuthDomain" placeholder="your-app.firebaseapp.com">
-            <label>databaseURL:</label> <input type="text" id="fbDbUrl" placeholder="https://your-app.firebaseio.com">
-            <label>projectId:</label> <input type="text" id="fbProjectId" placeholder="your-app">
-            <label>storageBucket:</label> <input type="text" id="fbStorage" placeholder="your-app.appspot.com">
-            <label>messagingSenderId:</label> <input type="text" id="fbSender" placeholder="123456789">
-            <label>appId:</label> <input type="text" id="fbAppId" placeholder="1:123456:web:abcd...">
-
-            <hr>
-            <h4 style="margin:10px 0 0 0; color:#2980b9;">🔗 Sharing Setup</h4>
-            <label>App Base URL (e.g. GitHub Link):</label>
-            <input type="text" id="appBaseUrl" placeholder="https://yourname.github.io/cargolog/">
-
-            <hr>
-            <h4 style="margin:10px 0 0 0; color:#27ae60;">📱 Telegram Backup Setup</h4>
-            <label>Bot Token:</label>
-            <input type="text" id="tgTokenInput" placeholder="123456789:ABCDefghIJKLmn...">
-            <label>Chat ID:</label>
-            <input type="text" id="tgChatIdInput" placeholder="123456789 or -100987654321">
-            
-            <div style="margin-top: 20px; text-align: right; position: sticky; bottom: 0; background: white; padding-top: 10px; border-top: 1px solid #eee;">
+            <div style="margin-top: 15px; text-align: right;">
                 <button onclick="closeSettings()" style="background:#e74c3c; color:white; border:none; padding:8px 12px; border-radius:4px; margin-right:10px; cursor:pointer;">Cancel</button>
-                <button onclick="saveSettings()" style="background:#27ae60; color:white; border:none; padding:8px 12px; border-radius:4px; cursor:pointer;">Save Setup & Reload</button>
+                <button onclick="saveSettings()" style="background:#27ae60; color:white; border:none; padding:8px 12px; border-radius:4px; cursor:pointer;">Save Setup</button>
             </div>
         </div>
     </div>
 
-    <!-- Menu, Modals, Info, Tabs, and Tables (Same as before) -->
+    <!-- Slide-out Menu -->
     <div class="side-menu" id="sideMenu">
         <button class="menu-close" onclick="toggleMenu()">✖ Close Menu</button>
         <button class="btn-new" onclick="newJob()">+ NEW JOB</button>
@@ -236,12 +289,15 @@
     </div>
     <div class="overlay" id="menuOverlay" onclick="toggleMenu()"></div>
 
+    <!-- Full Text Preview Popup Box -->
     <div id="fullTextPreview" class="full-text-preview"></div>
 
+    <!-- Shared Information Section -->
     <div class="info-section" id="topInfoSection">
         <table class="info-table">
             <tr>
                 <td>JOB NO:</td><td><input type="text" id="infoJobNo" class="info-input"></td>
+                <!-- Marking Photo Box Area -->
                 <td rowspan="6" style="text-align: center; vertical-align: top; background: #eee; width: 120px; padding: 5px; font-size:12px;">
                     <b>MARKING</b>
                     <div class="img-upload-box" onclick="triggerMarkingInput()">
@@ -260,46 +316,96 @@
         </table>
     </div>
 
+    <!-- Tabs -->
     <div class="tab-nav">
         <button class="tab-btn active" onclick="openTab(event, 'Preparation')">Preparation</button>
         <button class="tab-btn" onclick="openTab(event, 'Loading')">Loading</button>
         <button class="tab-btn" onclick="openTab(event, 'Summary')">Summary</button>
     </div>
 
+    <!-- Preparation Tab Content -->
     <div id="Preparation" class="tab-content active">
         <div class="data-section">
-            <div class="top-action-bar"><button class="mode-toggle-btn prep-edit-btn" onclick="toggleTableEdit()">⚙️ Edit / Delete Mode</button></div>
+            <div class="top-action-bar">
+                <button class="mode-toggle-btn prep-edit-btn" onclick="toggleTableEdit()">⚙️ Edit / Delete Mode</button>
+            </div>
             <table class="data-table" id="prepTableMain">
                 <thead>
                     <tr>
-                        <th class="col-no prep-th">No</th><th class="col-date prep-th">Date</th><th class="col-num prep-th">Day</th><th class="col-num prep-th">Night</th>
-                        <th class="col-num prep-th">D/N Total</th><th class="col-num prep-th">Grand Total</th><th class="col-num output-col" style="color: white;">Output</th><th class="col-num balance-col">Balance</th>
+                        <th class="col-no prep-th">No</th>
+                        <th class="col-date prep-th">Date</th>
+                        <th class="col-num prep-th">Day</th>
+                        <th class="col-num prep-th">Night</th>
+                        <th class="col-num prep-th">D/N Total</th>
+                        <th class="col-num prep-th">Grand Total</th>
+                        <th class="col-num output-col" style="color: white;">Output</th>
+                        <th class="col-num balance-col">Balance</th>
                     </tr>
                 </thead>
                 <tbody id="prepTableBody"></tbody>
                 <tfoot>
                     <tr style="font-weight: bold; background-color: #f9f9f9; font-size:13px;">
                         <td colspan="4" style="text-align: right; padding-right: 10px;">Total</td>
-                        <td id="prepTotalDN">0</td><td id="prepGrandTotal">0</td>
-                        <td id="prepTotalOutput" class="output-col" style="background-color: red; color: white;">0</td><td id="prepFinalBalance" class="balance-col">0</td>
+                        <td id="prepTotalDN">0</td>
+                        <td id="prepGrandTotal">0</td>
+                        <td id="prepTotalOutput" class="output-col" style="background-color: red; color: white;">0</td>
+                        <td id="prepFinalBalance" class="balance-col">0</td>
                     </tr>
                 </tfoot>
             </table>
-            <div class="action-buttons-row"><button class="btn-add" onclick="addPrepRow()">+ Add Row</button><button class="btn-delete" onclick="deletePrepRow()">- Delete Row</button></div>
-            <div class="notes-section"><textarea id="prepNotes" placeholder="Enter preparation notes here..."></textarea></div>
+            <div class="action-buttons-row">
+                <button class="btn-add" onclick="addPrepRow()">+ Add Row</button>
+                <button class="btn-delete" onclick="deletePrepRow()">- Delete Row</button>
+            </div>
+            <div class="notes-section">
+                <textarea id="prepNotes" placeholder="Enter preparation notes here..."></textarea>
+            </div>
         </div>
     </div>
 
+    <!-- Loading Tab Content -->
     <div id="Loading" class="tab-content">
         <div class="data-section">
-            <div class="top-action-bar"><button class="mode-toggle-btn" onclick="toggleTableEdit()">⚙️ Edit / Delete Mode</button></div>
+            <div class="top-action-bar">
+                <button class="mode-toggle-btn" onclick="toggleTableEdit()">⚙️ Edit / Delete Mode</button>
+            </div>
             <table class="data-table" id="loadingTableMain">
                 <thead id="loadThead">
                     <tr>
-                        <th class="col-no load-th">Sr</th><th class="col-date load-th">Date</th><th class="col-num load-th">Shift</th>
-                        <th class="col-num load-th std-col-truck"><div style="display:flex; justify-content:space-between; align-items:center; padding: 0 2px;"><span class="col-name-span" id="truckColName">Truck No</span><div class="col-action-btns"><button class="icon-btn" onclick="editStdCol('truckColName')">✎</button><button class="icon-btn icon-btn-del" onclick="deleteStdCol('std-col-truck')">✖</button></div></div></th>
-                        <th class="col-num load-th std-col-jumbo"><div style="display:flex; justify-content:space-between; align-items:center; padding: 0 2px;"><span class="col-name-span" id="jumboColName">Jumbo</span><div class="col-action-btns"><button class="icon-btn" onclick="editStdCol('jumboColName')">✎</button><button class="icon-btn icon-btn-del" onclick="deleteStdCol('std-col-jumbo')">✖</button></div></div></th>
-                        <th class="col-num load-th std-col-bags"><div style="display:flex; justify-content:space-between; align-items:center; padding: 0 2px;"><span class="col-name-span" id="bagsColName">50 Kgs Bags</span><div class="col-action-btns"><button class="icon-btn" onclick="editStdCol('bagsColName')">✎</button><button class="icon-btn icon-btn-del" onclick="deleteStdCol('std-col-bags')">✖</button></div></div></th>
+                        <th class="col-no load-th">Sr</th>
+                        <th class="col-date load-th">Date</th>
+                        <th class="col-num load-th">Shift</th>
+                        
+                        <th class="col-num load-th std-col-truck">
+                            <div style="display:flex; justify-content:space-between; align-items:center; padding: 0 2px;">
+                                <span class="col-name-span" id="truckColName">Truck No</span>
+                                <div class="col-action-btns">
+                                    <button class="icon-btn" onclick="editStdCol('truckColName')">✎</button>
+                                    <button class="icon-btn icon-btn-del" onclick="deleteStdCol('std-col-truck')">✖</button>
+                                </div>
+                            </div>
+                        </th>
+                        
+                        <th class="col-num load-th std-col-jumbo">
+                            <div style="display:flex; justify-content:space-between; align-items:center; padding: 0 2px;">
+                                <span class="col-name-span" id="jumboColName">Jumbo</span>
+                                <div class="col-action-btns">
+                                    <button class="icon-btn" onclick="editStdCol('jumboColName')">✎</button>
+                                    <button class="icon-btn icon-btn-del" onclick="deleteStdCol('std-col-jumbo')">✖</button>
+                                </div>
+                            </div>
+                        </th>
+                        
+                        <th class="col-num load-th std-col-bags">
+                            <div style="display:flex; justify-content:space-between; align-items:center; padding: 0 2px;">
+                                <span class="col-name-span" id="bagsColName">50 Kgs Bags</span>
+                                <div class="col-action-btns">
+                                    <button class="icon-btn" onclick="editStdCol('bagsColName')">✎</button>
+                                    <button class="icon-btn icon-btn-del" onclick="deleteStdCol('std-col-bags')">✖</button>
+                                </div>
+                            </div>
+                        </th>
+                        
                         <th class="load-th std-col-remark">Remarks</th>
                     </tr>
                 </thead>
@@ -307,18 +413,27 @@
                 <tfoot id="loadTfoot">
                     <tr class="load-total-row">
                         <td colspan="3" style="text-align: right; padding-right: 10px;">Total</td>
-                        <td class="std-col-truck" style="background-color: blue;"></td><td id="loadTotalJumbo" class="load-green-col std-col-jumbo">0</td><td id="loadTotalBags" class="load-green-col std-col-bags">0</td><td class="std-col-remark" style="background-color: lime;"></td>
+                        <td class="std-col-truck" style="background-color: blue;"></td>
+                        <td id="loadTotalJumbo" class="load-green-col std-col-jumbo">0</td>
+                        <td id="loadTotalBags" class="load-green-col std-col-bags">0</td>
+                        <td class="std-col-remark" style="background-color: lime;"></td>
                     </tr>
                 </tfoot>
             </table>
+            
             <div class="action-buttons-row">
-                <button class="btn-add" onclick="addLoadRow()">+ Add Row</button><button class="btn-delete" onclick="deleteLoadRow()">- Delete Row</button>
-                <button class="btn-add btn-add-col" onclick="addLoadColumn()">+ Add Column</button><button class="btn-delete" onclick="deleteLastDynCol()">- Delete Column</button>
+                <button class="btn-add" onclick="addLoadRow()">+ Add Row</button>
+                <button class="btn-delete" onclick="deleteLoadRow()">- Delete Row</button>
+                <button class="btn-add btn-add-col" onclick="addLoadColumn()">+ Add Column</button>
+                <button class="btn-delete" onclick="deleteLastDynCol()">- Delete Column</button>
             </div>
-            <div class="notes-section"><textarea id="loadNotes" placeholder="Enter loading remarks/notes here..."></textarea></div>
+            <div class="notes-section">
+                <textarea id="loadNotes" placeholder="Enter loading remarks/notes here..."></textarea>
+            </div>
         </div>
     </div>
 
+    <!-- Summary Tab Content -->
     <div id="Summary" class="tab-content">
         <div class="data-section">
             <h2>Summary Data</h2>
@@ -336,78 +451,29 @@
         // 1. CORE VARIABLES & STATE
         // ==========================================
         let isAdmin = false;
-        let prepRowCount = 0; let loadRowCount = 0;
-        let currentJobId = null; let dynColCount = 0;
-        let isEditMode = false; let currentMarkingBase64 = ""; 
+        let prepRowCount = 0; 
+        let loadRowCount = 0;
+        let currentJobId = null; 
+        let dynColCount = 0;
+        let isEditMode = false; 
+        let currentMarkingBase64 = ""; 
         let stdColsState = { truck: { exists: true, name: "Truck No" }, jumbo: { exists: true, name: "Jumbo" }, bags: { exists: true, name: "50 Kgs Bags" } };
         let pressTimer;
-        
-        let db = null;
-        let isFirebaseConfigured = false;
 
         // ==========================================
-        // 2. DYNAMIC FIREBASE SETUP
+        // 2. FIREBASE SETUP & INITIALIZATION
         // ==========================================
-        function initDynamicFirebase() {
-            let configStr = localStorage.getItem('customFirebaseConfig');
-            if (configStr) {
-                try {
-                    let customConfig = JSON.parse(configStr);
-                    if (customConfig && customConfig.apiKey && customConfig.databaseURL) {
-                        firebase.initializeApp(customConfig);
-                        db = firebase.database();
-                        isFirebaseConfigured = true;
-                        document.getElementById('noDbWarning').style.display = 'none';
-                        return;
-                    }
-                } catch(e) { console.error("Firebase Config Error:", e); }
-            }
-            // Show warning if no DB
-            isFirebaseConfigured = false;
-            document.getElementById('noDbWarning').style.display = 'block';
-        }
-        initDynamicFirebase();
-
-        // ==========================================
-        // 2.1 AUTO-FILL FIREBASE CODE LOGIC
-        // ==========================================
-        function autoFillFirebaseConfig() {
-            let pastedText = document.getElementById('fbConfigPaste').value;
-            if(!pastedText || pastedText.trim() === "") {
-                alert("Please paste the Firebase configuration code first.");
-                return;
-            }
-
-            // Keys to look for and map to their input IDs
-            const configMap = {
-                'apiKey': 'fbApiKey',
-                'authDomain': 'fbAuthDomain',
-                'databaseURL': 'fbDbUrl',
-                'projectId': 'fbProjectId',
-                'storageBucket': 'fbStorage',
-                'messagingSenderId': 'fbSender',
-                'appId': 'fbAppId'
-            };
-
-            let fieldsFound = 0;
-
-            for (let key in configMap) {
-                // Regex to find: key: "value" OR key: 'value'
-                let regex = new RegExp(key + "\\s*:\\s*[\"']([^\"']+)[\"']", "i");
-                let match = pastedText.match(regex);
-                
-                if (match && match[1]) {
-                    document.getElementById(configMap[key]).value = match[1];
-                    fieldsFound++;
-                }
-            }
-
-            if (fieldsFound > 0) {
-                alert(`Success! Auto-filled ${fieldsFound} fields from the code.`);
-            } else {
-                alert("Could not find any configuration values. Please make sure you pasted the correct 'firebaseConfig' code block.");
-            }
-        }
+        const firebaseConfig = {
+          apiKey: "AIzaSyCwERD6t6xnneFjWIvbp9IaOnN2uPoBBM4",
+          authDomain: "cargo-preparation.firebaseapp.com",
+          databaseURL: "https://cargo-preparation-default-rtdb.firebaseio.com",
+          projectId: "cargo-preparation",
+          storageBucket: "cargo-preparation.firebasestorage.app",
+          messagingSenderId: "965748943249",
+          appId: "1:965748943249:web:a3cec661d88b7a45ed1230"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
 
         // ==========================================
         // 3. AUTH & SETTINGS LOGIC
@@ -422,7 +488,7 @@
                 document.body.classList.add('viewer-mode');
                 authBtn.innerText = "🔒 Viewer";
                 authBtn.classList.remove('unlocked');
-                if(isEditMode) toggleTableEdit();
+                if(isEditMode) toggleTableEdit(); // Turn off edit mode if active
                 alert("Logged out. App is now in View-Only Mode.");
             } else {
                 let pass = prompt("Enter Admin Password:\n(Hint: Default password is 123456)");
@@ -442,21 +508,9 @@
 
         function openSettings() {
             if(!isAdmin) { alert("Please login as Admin to edit Settings."); return; }
-            
             document.getElementById('tgTokenInput').value = localStorage.getItem('tgBotToken') || '';
             document.getElementById('tgChatIdInput').value = localStorage.getItem('tgChatId') || '';
             document.getElementById('adminPassInput').value = getAdminPass();
-            document.getElementById('appBaseUrl').value = localStorage.getItem('appBaseUrl') || "";
-            
-            let fbConfig = JSON.parse(localStorage.getItem('customFirebaseConfig') || "{}");
-            document.getElementById('fbApiKey').value = fbConfig.apiKey || "";
-            document.getElementById('fbAuthDomain').value = fbConfig.authDomain || "";
-            document.getElementById('fbDbUrl').value = fbConfig.databaseURL || "";
-            document.getElementById('fbProjectId').value = fbConfig.projectId || "";
-            document.getElementById('fbStorage').value = fbConfig.storageBucket || "";
-            document.getElementById('fbSender').value = fbConfig.messagingSenderId || "";
-            document.getElementById('fbAppId').value = fbConfig.appId || "";
-
             document.getElementById('settingsModal').style.display = 'flex';
         }
         function closeSettings() { document.getElementById('settingsModal').style.display = 'none'; }
@@ -464,32 +518,13 @@
         function saveSettings() {
             localStorage.setItem('tgBotToken', document.getElementById('tgTokenInput').value.trim());
             localStorage.setItem('tgChatId', document.getElementById('tgChatIdInput').value.trim());
-            localStorage.setItem('appBaseUrl', document.getElementById('appBaseUrl').value.trim());
-            
             let newPass = document.getElementById('adminPassInput').value.trim();
             if(newPass) {
                 localStorage.setItem('adminPass', newPass);
                 localStorage.setItem('savedAdminAuth', newPass);
             }
-
-            let newConfig = {
-                apiKey: document.getElementById('fbApiKey').value.trim(),
-                authDomain: document.getElementById('fbAuthDomain').value.trim(),
-                databaseURL: document.getElementById('fbDbUrl').value.trim(),
-                projectId: document.getElementById('fbProjectId').value.trim(),
-                storageBucket: document.getElementById('fbStorage').value.trim(),
-                messagingSenderId: document.getElementById('fbSender').value.trim(),
-                appId: document.getElementById('fbAppId').value.trim()
-            };
-            
-            if(newConfig.apiKey && newConfig.databaseURL) {
-                localStorage.setItem('customFirebaseConfig', JSON.stringify(newConfig));
-            } else {
-                localStorage.removeItem('customFirebaseConfig');
-            }
-
-            alert("Settings Saved! The app will now reload to connect to your Database.");
-            window.location.reload();
+            closeSettings();
+            alert("Settings Saved Successfully! ⚙️✅");
         }
 
         // ==========================================
@@ -497,20 +532,17 @@
         // ==========================================
         function shareJobLink() {
             if(!currentJobId) return;
-            
-            let baseUrl = localStorage.getItem('appBaseUrl');
-            if(!baseUrl) baseUrl = window.location.href.split('?')[0];
-            
-            if (!baseUrl.endsWith('/') && !baseUrl.includes('html')) baseUrl += '/';
-            if (baseUrl.includes('.html')) baseUrl = baseUrl.split('.html')[0] + '.html';
-            
+            let baseUrl = window.location.href.split('?')[0];
             const url = baseUrl + "?job=" + encodeURIComponent(currentJobId);
             
             if (navigator.clipboard && window.isSecureContext) {
-                navigator.clipboard.writeText(url).then(() => { alert("Link Copied! \n\n" + url + "\n\nSend this link to your client."); })
-                .catch(err => { prompt("Please copy the link below:", url); });
+                navigator.clipboard.writeText(url).then(() => {
+                    alert("Link Copied! \n\n" + url + "\n\nSend this link to your client.");
+                }).catch(err => {
+                    prompt("Auto-copy blocked. Please long press and copy the link below:", url);
+                });
             } else {
-                prompt("Please copy the link below:", url);
+                prompt("Please long press and copy the link below:", url);
             }
         }
 
@@ -522,6 +554,7 @@
             const targetJob = urlParams.get('job');
             
             if (targetJob) {
+                // CLIENT VIEWER MODE
                 isAdmin = false; document.body.classList.add('viewer-mode');
                 document.getElementById('mainMenuToggle').style.display = 'none';
                 document.getElementById('authBtn').style.display = 'none';
@@ -530,6 +563,7 @@
                 for(let i=0; i<10; i++) addPrepRow(); for(let i=0; i<10; i++) addLoadRow();
                 loadJob(targetJob);
             } else {
+                // ADMIN MODE START
                 if (localStorage.getItem('savedAdminAuth') === getAdminPass()) {
                     isAdmin = true; document.body.classList.remove('viewer-mode');
                     const authBtn = document.getElementById('authBtn');
@@ -594,7 +628,10 @@
         // ==========================================
         // 7. GENERAL UI / MENU LOGIC
         // ==========================================
-        function toggleMenu() { document.getElementById("sideMenu").classList.toggle("open"); document.getElementById("menuOverlay").classList.toggle("open"); }
+        function toggleMenu() {
+            document.getElementById("sideMenu").classList.toggle("open");
+            document.getElementById("menuOverlay").classList.toggle("open");
+        }
 
         function openTab(evt, tabName) {
             let tabcontent = document.getElementsByClassName("tab-content");
@@ -625,7 +662,7 @@
         }
 
         // ==========================================
-        // 8. LONG PRESS PREVIEW
+        // 8. LONG PRESS PREVIEW LOGIC
         // ==========================================
         const previewBoxEl = document.getElementById('fullTextPreview');
         function getTargetInput(el) {
@@ -642,7 +679,13 @@
             }
         }
         function handlePressEnd() { clearTimeout(pressTimer); if(previewBoxEl) previewBoxEl.style.display = 'none'; }
-        document.addEventListener('touchstart', handlePressStart, {passive: true}); document.addEventListener('touchend', handlePressEnd); document.addEventListener('touchcancel', handlePressEnd); document.addEventListener('touchmove', handlePressEnd, {passive: true});  document.addEventListener('mousedown', handlePressStart); document.addEventListener('mouseup', handlePressEnd);
+
+        document.addEventListener('touchstart', handlePressStart, {passive: true});
+        document.addEventListener('touchend', handlePressEnd);
+        document.addEventListener('touchcancel', handlePressEnd);
+        document.addEventListener('touchmove', handlePressEnd, {passive: true}); 
+        document.addEventListener('mousedown', handlePressStart);
+        document.addEventListener('mouseup', handlePressEnd);
 
         // ==========================================
         // 9. CAMERA & IMAGE LOGIC
@@ -660,43 +703,72 @@
                         if (width > height) { if (width > 400) { height *= 400 / width; width = 400; } } else { if (height > 400) { width *= 400 / height; height = 400; } }
                         canvas.width = width; canvas.height = height; const ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0, width, height);
                         currentMarkingBase64 = canvas.toDataURL('image/jpeg', 0.7); 
-                        document.getElementById('markingPreview').src = currentMarkingBase64; document.getElementById('markingPreview').style.display = 'block'; document.getElementById('markingPlaceholder').style.display = 'none';
+                        document.getElementById('markingPreview').src = currentMarkingBase64;
+                        document.getElementById('markingPreview').style.display = 'block'; document.getElementById('markingPlaceholder').style.display = 'none';
                         if (isAdmin) document.getElementById('removeMarkingBtn').style.display = 'inline-block';
                     };
                     img.src = e.target.result;
                 }; reader.readAsDataURL(file);
             }
         }
-        function removeMarkingImage() { if (!isAdmin) return; currentMarkingBase64 = ""; document.getElementById('markingPreview').src = ""; document.getElementById('markingPreview').style.display = 'none'; document.getElementById('markingPlaceholder').style.display = 'inline'; document.getElementById('removeMarkingBtn').style.display = 'none'; document.getElementById('markingImageInput').value = ""; }
+        function removeMarkingImage() {
+            if (!isAdmin) return;
+            currentMarkingBase64 = ""; document.getElementById('markingPreview').src = "";
+            document.getElementById('markingPreview').style.display = 'none'; document.getElementById('markingPlaceholder').style.display = 'inline';
+            document.getElementById('removeMarkingBtn').style.display = 'none'; document.getElementById('markingImageInput').value = ""; 
+        }
 
         // ==========================================
         // 10. DATE LOGIC
         // ==========================================
-        function handleDateFocus(el) { if(!isAdmin) return; let val = el.value; if(val && val.includes('/')) { let parts = val.split('/'); if(parts.length === 3) { el.type = 'date'; el.value = `${parts[2]}-${parts[1]}-${parts[0]}`; } } else { el.type = 'date'; } try { el.showPicker(); } catch(e) {} }
-        function handleDateBlur(el) { if(!isAdmin) return; let val = el.value; if (val && val.includes('-')) { let parts = val.split('-'); if(parts.length === 3) { el.type = 'text'; el.value = `${parts[2]}/${parts[1]}/${parts[0]}`; } } else { el.type = 'text'; } syncOutputFromLoading(); }
+        function handleDateFocus(el) {
+            if(!isAdmin) return;
+            let val = el.value;
+            if(val && val.includes('/')) { let parts = val.split('/'); if(parts.length === 3) { el.type = 'date'; el.value = `${parts[2]}-${parts[1]}-${parts[0]}`; } } else { el.type = 'date'; }
+            try { el.showPicker(); } catch(e) {} 
+        }
+        function handleDateBlur(el) {
+            if(!isAdmin) return;
+            let val = el.value;
+            if (val && val.includes('-')) { let parts = val.split('-'); if(parts.length === 3) { el.type = 'text'; el.value = `${parts[2]}/${parts[1]}/${parts[0]}`; } } else { el.type = 'text'; }
+            syncOutputFromLoading();
+        }
 
         // ==========================================
         // 11. PREPARATION TABLE LOGIC
         // ==========================================
         function addPrepRow(data = { date: "", day: "", night: "", output: "" }) {
             prepRowCount++; const tbody = document.getElementById('prepTableBody'); const tr = document.createElement('tr');
-            tr.innerHTML = `<td style="background-color: #f9f9f9;">${prepRowCount}</td><td style="background-color: #b7e1cd;"><input type="text" class="p-date" value="${data.date}" onfocus="handleDateFocus(this)" onblur="handleDateBlur(this)"></td><td><input type="number" class="p-day" value="${data.day}" onkeyup="calcPrep()" onchange="calcPrep()"></td><td><input type="number" class="p-night" value="${data.night}" onkeyup="calcPrep()" onchange="calcPrep()"></td><td class="p-dn" style="background-color: #f9f9f9;">0</td><td class="p-grand" style="background-color: #f9f9f9;">0</td><td><input type="number" class="p-output output-col" value="${data.output}" onkeyup="calcPrep()" onchange="calcPrep()"></td><td class="p-balance" style="font-weight:bold; color:#00b050; background-color: #f0fdf4;">0</td>`; tbody.appendChild(tr); calcPrep();
+            tr.innerHTML = `
+                <td style="background-color: #f9f9f9;">${prepRowCount}</td>
+                <td style="background-color: #b7e1cd;"><input type="text" class="p-date" value="${data.date}" onfocus="handleDateFocus(this)" onblur="handleDateBlur(this)"></td>
+                <td><input type="number" class="p-day" value="${data.day}" onkeyup="calcPrep()" onchange="calcPrep()"></td>
+                <td><input type="number" class="p-night" value="${data.night}" onkeyup="calcPrep()" onchange="calcPrep()"></td>
+                <td class="p-dn" style="background-color: #f9f9f9;">0</td><td class="p-grand" style="background-color: #f9f9f9;">0</td>
+                <td><input type="number" class="p-output output-col" value="${data.output}" onkeyup="calcPrep()" onchange="calcPrep()"></td>
+                <td class="p-balance" style="font-weight:bold; color:#00b050; background-color: #f0fdf4;">0</td>
+            `; tbody.appendChild(tr); calcPrep();
         }
         function deletePrepRow() { const tbody = document.getElementById('prepTableBody'); if (tbody.children.length > 0) { tbody.removeChild(tbody.lastElementChild); prepRowCount--; calcPrep(); } }
         function calcPrep() {
             const rows = document.getElementById('prepTableBody').getElementsByTagName('tr'); let grandTotal = 0, sumOutput = 0;
             for (let i = 0; i < rows.length; i++) {
-                let day = parseFloat(rows[i].querySelector('.p-day').value) || 0; let night = parseFloat(rows[i].querySelector('.p-night').value) || 0; let output = parseFloat(rows[i].querySelector('.p-output').value) || 0; let dnTotal = day + night;
-                rows[i].querySelector('.p-dn').innerText = dnTotal > 0 ? dnTotal : ""; grandTotal += dnTotal; rows[i].querySelector('.p-grand').innerText = grandTotal > 0 ? grandTotal : ""; sumOutput += output; rows[i].querySelector('.p-balance').innerText = grandTotal - sumOutput;
+                let day = parseFloat(rows[i].querySelector('.p-day').value) || 0; let night = parseFloat(rows[i].querySelector('.p-night').value) || 0;
+                let output = parseFloat(rows[i].querySelector('.p-output').value) || 0; let dnTotal = day + night;
+                rows[i].querySelector('.p-dn').innerText = dnTotal > 0 ? dnTotal : ""; grandTotal += dnTotal; rows[i].querySelector('.p-grand').innerText = grandTotal > 0 ? grandTotal : "";
+                sumOutput += output; rows[i].querySelector('.p-balance').innerText = grandTotal - sumOutput;
             }
-            document.getElementById('prepGrandTotal').innerText = grandTotal; document.getElementById('prepTotalOutput').innerText = sumOutput; document.getElementById('prepFinalBalance').innerText = grandTotal - sumOutput; updateSummary();
+            document.getElementById('prepGrandTotal').innerText = grandTotal; document.getElementById('prepTotalOutput').innerText = sumOutput;
+            document.getElementById('prepFinalBalance').innerText = grandTotal - sumOutput; updateSummary();
         }
 
         // ==========================================
-        // 12. LOADING TABLE & DYNAMIC COLUMNS
+        // 12. LOADING TABLE & DYNAMIC COLUMNS LOGIC
         // ==========================================
         function editStdCol(spanId) { const span = document.getElementById(spanId); if (span) { const newName = prompt("Edit column name:", span.innerText); if (newName) { span.innerText = newName; if(spanId === 'truckColName') stdColsState.truck.name = newName; if(spanId === 'jumboColName') stdColsState.jumbo.name = newName; if(spanId === 'bagsColName') stdColsState.bags.name = newName; updateSummary(); } } }
-        function deleteStdCol(colClass) { if (confirm("Are you sure you want to delete this column?")) { document.querySelectorAll('.' + colClass).forEach(el => el.classList.add('hidden-col')); if(colClass === 'std-col-truck') stdColsState.truck.exists = false; if(colClass === 'std-col-jumbo') stdColsState.jumbo.exists = false; if(colClass === 'std-col-bags') stdColsState.bags.exists = false; calcLoad(); updateSummary(); } }
+        function deleteStdCol(colClass) {
+            if (confirm("Are you sure you want to delete this column?")) { document.querySelectorAll('.' + colClass).forEach(el => el.classList.add('hidden-col')); if(colClass === 'std-col-truck') stdColsState.truck.exists = false; if(colClass === 'std-col-jumbo') stdColsState.jumbo.exists = false; if(colClass === 'std-col-bags') stdColsState.bags.exists = false; calcLoad(); updateSummary(); }
+        }
         function restoreStdColsUI() {
             document.querySelectorAll('.std-col-truck').forEach(el => { if(stdColsState.truck.exists) el.classList.remove('hidden-col'); else el.classList.add('hidden-col'); });
             document.querySelectorAll('.std-col-jumbo').forEach(el => { if(stdColsState.jumbo.exists) el.classList.remove('hidden-col'); else el.classList.add('hidden-col'); });
@@ -755,7 +827,6 @@
         // 13. FIREBASE CLOUD DATABASE LOGIC
         // ==========================================
         function updateJobDropdown() {
-            if(!isFirebaseConfigured) return;
             db.ref('jobs').once('value').then((snapshot) => {
                 const jobs = snapshot.val() || {}; 
                 const select = document.getElementById('jobSelector');
@@ -778,7 +849,9 @@
                 document.getElementById('shareBtn').style.display = 'none';
                 document.getElementById('jobActionBtns').style.display = 'none'; 
                 
+                // Clear Layout Sizes
                 document.querySelectorAll('.data-table th').forEach(th => { th.style.width = ""; th.style.minWidth = ""; th.style.maxWidth = ""; });
+
                 stdColsState = { truck: { exists: true, name: "Truck No" }, jumbo: { exists: true, name: "Jumbo" }, bags: { exists: true, name: "50 Kgs Bags" } };
                 restoreStdColsUI(); document.querySelectorAll('.dyn-col').forEach(el => el.remove());
                 dynColCount = 0; prepRowCount = 0; loadRowCount = 0;
@@ -788,87 +861,161 @@
         }
 
         function getJobState() {
+            // Capture Dyn Cols
             let loadDynCols = [];
             document.querySelectorAll('#Loading thead th.dyn-col').forEach(th => {
-                let colId = Array.from(th.classList).find(c => c.startsWith('dyn_col_')); let colName = th.querySelector('.col-name-span').innerText;
+                let colId = Array.from(th.classList).find(c => c.startsWith('dyn_col_'));
+                let colName = th.querySelector('.col-name-span').innerText;
                 loadDynCols.push({ id: colId, name: colName });
             });
-            let prepWidths = []; document.querySelectorAll('#prepTableMain th').forEach(th => prepWidths.push(th.style.width || ""));
-            let loadWidths = []; document.querySelectorAll('#loadingTableMain th').forEach(th => loadWidths.push(th.style.width || ""));
+
+            // Capture Layout Sizes
+            let prepWidths = [];
+            document.querySelectorAll('#prepTableMain th').forEach(th => prepWidths.push(th.style.width || ""));
+            let loadWidths = [];
+            document.querySelectorAll('#loadingTableMain th').forEach(th => loadWidths.push(th.style.width || ""));
 
             let state = {
                 info: {
                     jobNo: document.getElementById('infoJobNo').value, shipper: document.getElementById('infoShipper').value,
                     buyer: document.getElementById('infoBuyer').value, quality: document.getElementById('infoQuality').value,
                     quantity: document.getElementById('infoQuantity').value, place: document.getElementById('infoPlace').value,
-                    prepNotes: document.getElementById('prepNotes').value, loadNotes: document.getElementById('loadNotes').value, markingImage: currentMarkingBase64
+                    prepNotes: document.getElementById('prepNotes').value, loadNotes: document.getElementById('loadNotes').value,
+                    markingImage: currentMarkingBase64
                 },
-                stdCols: stdColsState, prepData: [], loadDynCols: loadDynCols, loadData: [], layout: { prepWidths: prepWidths, loadWidths: loadWidths }
+                stdCols: stdColsState, prepData: [], loadDynCols: loadDynCols, loadData: [],
+                layout: { prepWidths: prepWidths, loadWidths: loadWidths }
             };
             document.getElementById('prepTableBody').querySelectorAll('tr').forEach(r => {
-                state.prepData.push({ date: r.querySelector('.p-date').value, day: r.querySelector('.p-day').value, night: r.querySelector('.p-night').value, output: r.querySelector('.p-output').value });
+                state.prepData.push({
+                    date: r.querySelector('.p-date').value, day: r.querySelector('.p-day').value,
+                    night: r.querySelector('.p-night').value, output: r.querySelector('.p-output').value
+                });
             });
             document.getElementById('loadTableBody').querySelectorAll('tr').forEach(r => {
-                let dynData = {}; r.querySelectorAll('.l-dyn-input').forEach(inp => { dynData[inp.dataset.colid] = inp.value; });
-                state.loadData.push({ date: r.querySelector('.l-date').value, shift: r.querySelector('.l-shift').value, truck: r.querySelector('.l-truck') ? r.querySelector('.l-truck').value : '', jumbo: r.querySelector('.l-jumbo') ? r.querySelector('.l-jumbo').value : '', bags: r.querySelector('.l-bags') ? r.querySelector('.l-bags').value : '', remarks: r.querySelector('.l-remark').value, dynData: dynData });
+                let dynData = {};
+                r.querySelectorAll('.l-dyn-input').forEach(inp => { dynData[inp.dataset.colid] = inp.value; });
+                state.loadData.push({
+                    date: r.querySelector('.l-date').value, shift: r.querySelector('.l-shift').value,
+                    truck: r.querySelector('.l-truck') ? r.querySelector('.l-truck').value : '',
+                    jumbo: r.querySelector('.l-jumbo') ? r.querySelector('.l-jumbo').value : '',
+                    bags: r.querySelector('.l-bags') ? r.querySelector('.l-bags').value : '',
+                    remarks: r.querySelector('.l-remark').value, dynData: dynData
+                });
             });
             return state;
         }
 
         function saveJob() {
-            if(!isFirebaseConfigured) { alert("Please configure Database Setup in ⚙️ Settings first."); return; }
             let jobNo = document.getElementById('infoJobNo').value.trim();
             if(!jobNo) { alert("Please enter a JOB NO to save."); return; }
             let state = getJobState();
             
-            const saveBtn = document.getElementById('menuSaveBtn'); saveBtn.innerText = "⏳ SAVING...";
+            const saveBtn = document.getElementById('menuSaveBtn');
+            saveBtn.innerText = "⏳ SAVING TO CLOUD...";
 
             db.ref('jobs/' + jobNo).set(state).then(() => {
-                currentJobId = jobNo; updateJobDropdown();
-                document.getElementById('shareBtn').style.display = 'inline-block'; document.getElementById('jobActionBtns').style.display = 'flex'; 
-                saveBtn.innerText = "💾 SAVE TO CLOUD"; alert("Job Saved Successfully! ☁️✅"); toggleMenu();
-            }).catch(e => { alert("Error saving: " + e.message); saveBtn.innerText = "💾 SAVE TO CLOUD"; });
+                currentJobId = jobNo; 
+                updateJobDropdown();
+                document.getElementById('shareBtn').style.display = 'inline-block';
+                document.getElementById('jobActionBtns').style.display = 'flex'; 
+                saveBtn.innerText = "💾 SAVE TO CLOUD";
+                alert("Job Saved to Cloud Successfully! ☁️✅");
+                toggleMenu();
+            }).catch(e => {
+                alert("Error saving: " + e.message);
+                saveBtn.innerText = "💾 SAVE TO CLOUD";
+            });
         }
 
-        function saveAsJob() { let newJobNo = prompt("Enter new JOB NO:"); if(newJobNo) { document.getElementById('infoJobNo').value = newJobNo; saveJob(); } }
+        function saveAsJob() {
+            let newJobNo = prompt("Enter new JOB NO:");
+            if(newJobNo) { document.getElementById('infoJobNo').value = newJobNo; saveJob(); }
+        }
 
         function loadJob(jobNo) {
-            if(!isFirebaseConfigured || !jobNo) return;
+            if(!jobNo) return;
+            
             db.ref('jobs/' + jobNo).once('value').then((snapshot) => {
                 let job = snapshot.val();
                 if(job) {
                     currentJobId = jobNo;
-                    document.getElementById('infoJobNo').value = job.info.jobNo || ""; document.getElementById('infoShipper').value = job.info.shipper || "";
-                    document.getElementById('infoBuyer').value = job.info.buyer || ""; document.getElementById('infoQuality').value = job.info.quality || "";
-                    document.getElementById('infoQuantity').value = job.info.quantity || ""; document.getElementById('infoPlace').value = job.info.place || "";
-                    document.getElementById('prepNotes').value = job.info.prepNotes || ""; document.getElementById('loadNotes').value = job.info.loadNotes || "";
+                    document.getElementById('infoJobNo').value = job.info.jobNo || "";
+                    document.getElementById('infoShipper').value = job.info.shipper || "";
+                    document.getElementById('infoBuyer').value = job.info.buyer || "";
+                    document.getElementById('infoQuality').value = job.info.quality || "";
+                    document.getElementById('infoQuantity').value = job.info.quantity || "";
+                    document.getElementById('infoPlace').value = job.info.place || "";
+                    document.getElementById('prepNotes').value = job.info.prepNotes || "";
+                    document.getElementById('loadNotes').value = job.info.loadNotes || "";
 
                     currentMarkingBase64 = (job.info && job.info.markingImage) ? job.info.markingImage : "";
                     if(currentMarkingBase64) {
-                        document.getElementById('markingPreview').src = currentMarkingBase64; document.getElementById('markingPreview').style.display = 'block'; document.getElementById('markingPlaceholder').style.display = 'none';
+                        document.getElementById('markingPreview').src = currentMarkingBase64;
+                        document.getElementById('markingPreview').style.display = 'block';
+                        document.getElementById('markingPlaceholder').style.display = 'none';
                         if (isAdmin) document.getElementById('removeMarkingBtn').style.display = 'inline-block';
-                    } else { document.getElementById('markingPreview').src = ""; document.getElementById('markingPreview').style.display = 'none'; document.getElementById('markingPlaceholder').style.display = 'inline'; document.getElementById('removeMarkingBtn').style.display = 'none'; }
+                    } else {
+                        document.getElementById('markingPreview').src = "";
+                        document.getElementById('markingPreview').style.display = 'none';
+                        document.getElementById('markingPlaceholder').style.display = 'inline';
+                        document.getElementById('removeMarkingBtn').style.display = 'none';
+                    }
 
                     stdColsState = job.stdCols ? job.stdCols : { truck: { exists: true, name: "Truck No" }, jumbo: { exists: true, name: "Jumbo" }, bags: { exists: true, name: "50 Kgs Bags" } };
                     restoreStdColsUI();
                     
-                    document.getElementById('prepTableBody').innerHTML = ""; prepRowCount = 0; if(job.prepData) job.prepData.forEach(row => addPrepRow(row));
+                    document.getElementById('prepTableBody').innerHTML = ""; prepRowCount = 0;
+                    if(job.prepData) job.prepData.forEach(row => addPrepRow(row));
 
                     document.querySelectorAll('.dyn-col').forEach(el => el.remove()); dynColCount = 0;
-                    if (job.loadDynCols) { job.loadDynCols.forEach(c => { addLoadColumn(c.name, c.id); let num = parseInt(c.id.replace('dyn_col_', '')); if (num > dynColCount) dynColCount = num; }); }
-                    document.getElementById('loadTableBody').innerHTML = ""; loadRowCount = 0; if(job.loadData) job.loadData.forEach(row => addLoadRow(row)); 
+                    if (job.loadDynCols) {
+                        job.loadDynCols.forEach(c => {
+                            addLoadColumn(c.name, c.id);
+                            let num = parseInt(c.id.replace('dyn_col_', ''));
+                            if (num > dynColCount) dynColCount = num;
+                        });
+                    }
+                    document.getElementById('loadTableBody').innerHTML = ""; loadRowCount = 0;
+                    if(job.loadData) job.loadData.forEach(row => addLoadRow(row)); 
                     
                     updateSummary(); 
 
+                    // Restore Layout Sizes
                     if (job.layout) {
-                        if (job.layout.prepWidths) { document.querySelectorAll('#prepTableMain th').forEach((th, i) => { if (job.layout.prepWidths[i]) { th.style.width = job.layout.prepWidths[i]; th.style.minWidth = job.layout.prepWidths[i]; th.style.maxWidth = job.layout.prepWidths[i]; } else { th.style.width = ""; th.style.minWidth = ""; th.style.maxWidth = ""; } }); }
-                        if (job.layout.loadWidths) { document.querySelectorAll('#loadingTableMain th').forEach((th, i) => { if (job.layout.loadWidths[i]) { th.style.width = job.layout.loadWidths[i]; th.style.minWidth = job.layout.loadWidths[i]; th.style.maxWidth = job.layout.loadWidths[i]; } else { th.style.width = ""; th.style.minWidth = ""; th.style.maxWidth = ""; } }); }
-                    } else { document.querySelectorAll('.data-table th').forEach(th => { th.style.width = ""; th.style.minWidth = ""; th.style.maxWidth = ""; }); }
+                        if (job.layout.prepWidths) {
+                            document.querySelectorAll('#prepTableMain th').forEach((th, i) => {
+                                if (job.layout.prepWidths[i]) {
+                                    th.style.width = job.layout.prepWidths[i];
+                                    th.style.minWidth = job.layout.prepWidths[i];
+                                    th.style.maxWidth = job.layout.prepWidths[i];
+                                } else { th.style.width = ""; th.style.minWidth = ""; th.style.maxWidth = ""; }
+                            });
+                        }
+                        if (job.layout.loadWidths) {
+                            document.querySelectorAll('#loadingTableMain th').forEach((th, i) => {
+                                if (job.layout.loadWidths[i]) {
+                                    th.style.width = job.layout.loadWidths[i];
+                                    th.style.minWidth = job.layout.loadWidths[i];
+                                    th.style.maxWidth = job.layout.loadWidths[i];
+                                } else { th.style.width = ""; th.style.minWidth = ""; th.style.maxWidth = ""; }
+                            });
+                        }
+                    } else {
+                        document.querySelectorAll('.data-table th').forEach(th => { th.style.width = ""; th.style.minWidth = ""; th.style.maxWidth = ""; });
+                    }
 
-                    if(isAdmin) { document.getElementById('shareBtn').style.display = 'inline-block'; document.getElementById('jobActionBtns').style.display = 'flex'; }
-                    document.getElementById("sideMenu").classList.remove("open"); document.getElementById("menuOverlay").classList.remove("open");
+                    if(isAdmin) {
+                        document.getElementById('shareBtn').style.display = 'inline-block';
+                        document.getElementById('jobActionBtns').style.display = 'flex'; 
+                    }
+                    document.getElementById("sideMenu").classList.remove("open");
+                    document.getElementById("menuOverlay").classList.remove("open");
+                    
                     initResizableColumns(); 
-                } else { alert("Job not found in Cloud Database."); }
+                } else {
+                    alert("Job not found in Cloud Database.");
+                }
             });
         }
 
@@ -876,18 +1023,20 @@
         // 14. EDIT / DELETE CURRENT JOB
         // ==========================================
         function renameCurrentJob() {
-            if(!currentJobId || !isFirebaseConfigured) return;
+            if(!currentJobId) return;
             let newJobNo = prompt("Enter new Job No to rename:", currentJobId);
             if(newJobNo && newJobNo !== currentJobId) {
                 if(confirm("Are you sure you want to rename job '" + currentJobId + "' to '" + newJobNo + "'?")) {
                     db.ref('jobs/' + currentJobId).once('value').then((snapshot) => {
                         let data = snapshot.val();
                         if(data) {
-                            data.info.jobNo = newJobNo; 
+                            data.info.jobNo = newJobNo; // Update internal jobNo
                             db.ref('jobs/' + newJobNo).set(data).then(() => {
-                                db.ref('jobs/' + currentJobId).remove(); 
-                                currentJobId = newJobNo; document.getElementById('infoJobNo').value = newJobNo;
-                                updateJobDropdown(); alert("Job Renamed Successfully! ✅");
+                                db.ref('jobs/' + currentJobId).remove(); // Delete old record
+                                currentJobId = newJobNo;
+                                document.getElementById('infoJobNo').value = newJobNo;
+                                updateJobDropdown();
+                                alert("Job Renamed Successfully! ✅");
                             });
                         }
                     });
@@ -896,16 +1045,24 @@
         }
 
         function deleteCurrentJob() {
-            if(!currentJobId || !isFirebaseConfigured) return;
+            if(!currentJobId) return;
             if(confirm("⚠️ Are you sure you want to permanently delete Job: '" + currentJobId + "'?\nThis action cannot be undone!")) {
                 db.ref('jobs/' + currentJobId).remove().then(() => {
                     alert("Job Deleted Successfully! 🗑️");
-                    currentJobId = null; document.getElementById('infoJobNo').value = "";
-                    document.getElementById('prepTableBody').innerHTML = ""; document.getElementById('loadTableBody').innerHTML = "";
+                    currentJobId = null;
+                    document.getElementById('infoJobNo').value = "";
+                    document.getElementById('prepTableBody').innerHTML = ""; 
+                    document.getElementById('loadTableBody').innerHTML = "";
                     prepRowCount = 0; loadRowCount = 0;
-                    for(let i=0; i<10; i++) addPrepRow(); for(let i=0; i<10; i++) addLoadRow();
+                    for(let i=0; i<10; i++) addPrepRow(); 
+                    for(let i=0; i<10; i++) addLoadRow();
+                    
                     document.querySelectorAll('.data-table th').forEach(th => { th.style.width = ""; th.style.minWidth = ""; th.style.maxWidth = ""; });
-                    updateJobDropdown(); document.getElementById('shareBtn').style.display = 'none'; document.getElementById('jobActionBtns').style.display = 'none'; updateSummary();
+                    
+                    updateJobDropdown();
+                    document.getElementById('shareBtn').style.display = 'none';
+                    document.getElementById('jobActionBtns').style.display = 'none';
+                    updateSummary();
                 });
             }
         }
@@ -914,16 +1071,17 @@
         // 15. BACKUP & RESTORE
         // ==========================================
         async function backupData() {
-            if(!isFirebaseConfigured) { alert("Database not connected."); return; }
             db.ref('jobs').once('value').then(snapshot => {
                 let jobsData = JSON.stringify(snapshot.val() || {});
                 if(jobsData === "{}") { alert("No data to backup."); return; }
-                const blob = new Blob([jobsData], { type: "application/json" }); const url = URL.createObjectURL(blob); const a = document.createElement("a"); a.href = url; a.download = "cargo_jobs_cloud_backup_" + new Date().toISOString().slice(0,10) + ".json"; document.body.appendChild(a); a.click(); document.body.removeChild(a);
+                const blob = new Blob([jobsData], { type: "application/json" });
+                const url = URL.createObjectURL(blob); const a = document.createElement("a");
+                a.href = url; a.download = "cargo_jobs_cloud_backup_" + new Date().toISOString().slice(0,10) + ".json";
+                document.body.appendChild(a); a.click(); document.body.removeChild(a);
             });
         }
 
         async function telegramBackup() {
-            if(!isFirebaseConfigured) { alert("Database not connected."); return; }
             db.ref('jobs').once('value').then(async (snapshot) => {
                 let jobsData = JSON.stringify(snapshot.val() || {});
                 if(jobsData === "{}") { alert("No data to backup."); return; }
@@ -931,19 +1089,34 @@
                 let token = localStorage.getItem('tgBotToken'); let chatId = localStorage.getItem('tgChatId');
                 if(!token || !chatId) { alert("Configure Telegram Bot in Settings first."); if(isAdmin) openSettings(); return; }
 
-                let file = new File([jobsData], "cargo_cloud_backup.json", { type: "application/json" }); let formData = new FormData(); formData.append('chat_id', chatId); formData.append('document', file); formData.append('caption', '📦 Cargo Log Cloud Backup\n📅 Date: ' + new Date().toLocaleString());
+                let file = new File([jobsData], "cargo_cloud_backup.json", { type: "application/json" });
+                let formData = new FormData(); formData.append('chat_id', chatId); formData.append('document', file);
+                formData.append('caption', '📦 Cargo Log Cloud Backup\n📅 Date: ' + new Date().toLocaleString());
 
                 let btn = document.getElementById('tgBackupBtn');
-                try { btn.innerText = "⏳ SENDING..."; let response = await fetch(`https://api.telegram.org/bot${token}/sendDocument`, { method: 'POST', body: formData }); let resData = await response.json(); if(resData.ok) { alert("Backup sent to Telegram Cloud! ☁️✅"); } else { alert("Failed: " + resData.description); } } catch(e) { alert("Network error while sending to Telegram."); } finally { btn.innerText = "☁️ TELEGRAM BACKUP"; }
+                try {
+                    btn.innerText = "⏳ SENDING...";
+                    let response = await fetch(`https://api.telegram.org/bot${token}/sendDocument`, { method: 'POST', body: formData });
+                    let resData = await response.json();
+                    if(resData.ok) { alert("Backup sent to Telegram Cloud! ☁️✅"); } else { alert("Failed: " + resData.description); }
+                } catch(e) { alert("Network error while sending to Telegram."); } finally { btn.innerText = "☁️ TELEGRAM BACKUP"; }
             });
         }
 
         function restoreData(event) {
-            if(!isFirebaseConfigured) { alert("Database not connected."); return; }
-            const file = event.target.files[0]; if (!file) return; const reader = new FileReader();
+            const file = event.target.files[0]; if (!file) return;
+            const reader = new FileReader();
             reader.onload = function(e) {
-                try { const importedJobs = JSON.parse(e.target.result); db.ref('jobs').set(importedJobs).then(() => { updateJobDropdown(); toggleMenu(); alert("Data restored successfully to Cloud Database! ☁️✅"); }); document.getElementById('restoreFile').value = ""; } catch (err) { alert("Invalid Backup File!"); }
-            }; reader.readAsText(file);
+                try {
+                    const importedJobs = JSON.parse(e.target.result);
+                    db.ref('jobs').set(importedJobs).then(() => {
+                        updateJobDropdown(); toggleMenu();
+                        alert("Data restored successfully to Cloud Database! ☁️✅");
+                    });
+                    document.getElementById('restoreFile').value = ""; 
+                } catch (err) { alert("Invalid Backup File!"); }
+            };
+            reader.readAsText(file);
         }
 
     </script>
