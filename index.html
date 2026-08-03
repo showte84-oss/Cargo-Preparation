@@ -78,7 +78,7 @@
             width: 100%; box-sizing: border-box; padding: 8px; margin: 4px 0 5px 0;
             border: 1px solid #ccc; border-radius: 4px; font-size: 13px; outline: none;
         }
-        .settings-content input:focus { border-color: #3498db; }
+        .settings-content input:focus, .settings-content textarea:focus { border-color: #3498db; }
         .settings-content hr { border: 0; border-top: 1px solid #ddd; margin: 15px 0; }
 
         /* Shared Top Header Info */
@@ -188,6 +188,13 @@
             <h4 style="margin:10px 0 0 0; color:#e74c3c;">🔌 Database Setup (Firebase)</h4>
             <p style="font-size:11px; color:#666; margin: 2px 0 10px 0;">Enter your Firebase Config to make this app independent.</p>
             
+            <!-- AUTO FILL SECTION -->
+            <div style="background-color: #f8f9fa; padding: 10px; border-radius: 6px; border: 1px dashed #bdc3c7; margin-bottom: 10px;">
+                <label style="color: #2980b9; margin-top: 0;">⚡ Fast Setup: Paste full firebaseConfig code here</label>
+                <textarea id="fbConfigPaste" rows="4" style="width: 100%; box-sizing: border-box; padding: 8px; font-family: monospace; font-size: 11px; margin: 5px 0; border: 1px solid #ccc; border-radius: 4px;" placeholder="const firebaseConfig = {&#10;  apiKey: '...',&#10;  authDomain: '...',&#10;  ...&#10;};"></textarea>
+                <button onclick="autoFillFirebaseConfig()" style="background:#3498db; color:white; border:none; padding:8px 10px; border-radius:4px; font-weight: bold; font-size: 12px; cursor:pointer; width: 100%;">Auto-Fill Fields Below</button>
+            </div>
+
             <label>apiKey:</label> <input type="text" id="fbApiKey" placeholder="AIzaSy...">
             <label>authDomain:</label> <input type="text" id="fbAuthDomain" placeholder="your-app.firebaseapp.com">
             <label>databaseURL:</label> <input type="text" id="fbDbUrl" placeholder="https://your-app.firebaseio.com">
@@ -359,10 +366,48 @@
             isFirebaseConfigured = false;
             document.getElementById('noDbWarning').style.display = 'block';
         }
-        
-        // Call it immediately
         initDynamicFirebase();
 
+        // ==========================================
+        // 2.1 AUTO-FILL FIREBASE CODE LOGIC
+        // ==========================================
+        function autoFillFirebaseConfig() {
+            let pastedText = document.getElementById('fbConfigPaste').value;
+            if(!pastedText || pastedText.trim() === "") {
+                alert("Please paste the Firebase configuration code first.");
+                return;
+            }
+
+            // Keys to look for and map to their input IDs
+            const configMap = {
+                'apiKey': 'fbApiKey',
+                'authDomain': 'fbAuthDomain',
+                'databaseURL': 'fbDbUrl',
+                'projectId': 'fbProjectId',
+                'storageBucket': 'fbStorage',
+                'messagingSenderId': 'fbSender',
+                'appId': 'fbAppId'
+            };
+
+            let fieldsFound = 0;
+
+            for (let key in configMap) {
+                // Regex to find: key: "value" OR key: 'value'
+                let regex = new RegExp(key + "\\s*:\\s*[\"']([^\"']+)[\"']", "i");
+                let match = pastedText.match(regex);
+                
+                if (match && match[1]) {
+                    document.getElementById(configMap[key]).value = match[1];
+                    fieldsFound++;
+                }
+            }
+
+            if (fieldsFound > 0) {
+                alert(`Success! Auto-filled ${fieldsFound} fields from the code.`);
+            } else {
+                alert("Could not find any configuration values. Please make sure you pasted the correct 'firebaseConfig' code block.");
+            }
+        }
 
         // ==========================================
         // 3. AUTH & SETTINGS LOGIC
@@ -398,13 +443,11 @@
         function openSettings() {
             if(!isAdmin) { alert("Please login as Admin to edit Settings."); return; }
             
-            // Load Normal Settings
             document.getElementById('tgTokenInput').value = localStorage.getItem('tgBotToken') || '';
             document.getElementById('tgChatIdInput').value = localStorage.getItem('tgChatId') || '';
             document.getElementById('adminPassInput').value = getAdminPass();
             document.getElementById('appBaseUrl').value = localStorage.getItem('appBaseUrl') || "";
             
-            // Load Firebase Settings
             let fbConfig = JSON.parse(localStorage.getItem('customFirebaseConfig') || "{}");
             document.getElementById('fbApiKey').value = fbConfig.apiKey || "";
             document.getElementById('fbAuthDomain').value = fbConfig.authDomain || "";
@@ -419,7 +462,6 @@
         function closeSettings() { document.getElementById('settingsModal').style.display = 'none'; }
         
         function saveSettings() {
-            // Save basic settings
             localStorage.setItem('tgBotToken', document.getElementById('tgTokenInput').value.trim());
             localStorage.setItem('tgChatId', document.getElementById('tgChatIdInput').value.trim());
             localStorage.setItem('appBaseUrl', document.getElementById('appBaseUrl').value.trim());
@@ -430,7 +472,6 @@
                 localStorage.setItem('savedAdminAuth', newPass);
             }
 
-            // Save Firebase settings
             let newConfig = {
                 apiKey: document.getElementById('fbApiKey').value.trim(),
                 authDomain: document.getElementById('fbAuthDomain').value.trim(),
@@ -457,11 +498,9 @@
         function shareJobLink() {
             if(!currentJobId) return;
             
-            // Get base URL from settings, or use current URL
             let baseUrl = localStorage.getItem('appBaseUrl');
             if(!baseUrl) baseUrl = window.location.href.split('?')[0];
             
-            // Ensure trailing slash structure is clean
             if (!baseUrl.endsWith('/') && !baseUrl.includes('html')) baseUrl += '/';
             if (baseUrl.includes('.html')) baseUrl = baseUrl.split('.html')[0] + '.html';
             
@@ -483,7 +522,6 @@
             const targetJob = urlParams.get('job');
             
             if (targetJob) {
-                // CLIENT VIEWER MODE
                 isAdmin = false; document.body.classList.add('viewer-mode');
                 document.getElementById('mainMenuToggle').style.display = 'none';
                 document.getElementById('authBtn').style.display = 'none';
@@ -492,7 +530,6 @@
                 for(let i=0; i<10; i++) addPrepRow(); for(let i=0; i<10; i++) addLoadRow();
                 loadJob(targetJob);
             } else {
-                // ADMIN MODE START
                 if (localStorage.getItem('savedAdminAuth') === getAdminPass()) {
                     isAdmin = true; document.body.classList.remove('viewer-mode');
                     const authBtn = document.getElementById('authBtn');
