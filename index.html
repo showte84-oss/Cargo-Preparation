@@ -141,7 +141,7 @@
         }
         .data-table { border-collapse: collapse; width: 100%; min-width: 600px; text-align: center; }
         .data-table th, .data-table td { border: 1px solid #555; padding: 0; height: 32px; vertical-align: middle; box-sizing: border-box; }
-        .data-table th { padding: 4px; font-size: 12px; position: relative; }
+        .data-table th { padding: 4px; font-size: 12px; position: relative; /* For resizer */ }
         
         .data-table input, .data-table select {
             width: 100%; height: 100%; box-sizing: border-box; border: none;
@@ -150,6 +150,7 @@
         .data-table input:focus, .data-table select:focus { background-color: rgba(0, 123, 255, 0.1); }
         .data-table select { text-align-last: center; } 
 
+        /* Action Buttons & Edit Mode */
         .top-action-bar { display: flex; justify-content: flex-end; padding-bottom: 5px; }
         .mode-toggle-btn {
             background: #fff; border: 1px solid #777; padding: 5px 10px; border-radius: 4px;
@@ -167,9 +168,12 @@
             position: absolute; top: 0; right: 0; width: 10px; height: 100%;
             cursor: col-resize; user-select: none; z-index: 10; display: none; 
         }
-        .edit-mode-active .resizer { display: block; background-color: rgba(231, 76, 60, 0.2); border-right: 2px solid #e74c3c; }
+        .edit-mode-active .resizer {
+            display: block; background-color: rgba(231, 76, 60, 0.2); border-right: 2px solid #e74c3c;
+        }
         .resizer:hover, .resizer.resizing { background-color: rgba(231, 76, 60, 0.8); }
 
+        /* Colors */
         .prep-th { background-color: #00b0f0; color: black; font-weight: bold; }
         .output-col { color: red; font-weight: bold; }
         .balance-col { background-color: #00b050; color: white; font-weight: bold; }
@@ -204,7 +208,8 @@
         body.viewer-mode .btn-saveas,
         body.viewer-mode #removeMarkingBtn,
         body.viewer-mode #settingsIconBtn,
-        body.viewer-mode #shareBtn {
+        body.viewer-mode #shareBtn,
+        body.viewer-mode #jobActionBtns {
             display: none !important;
         }
         
@@ -245,7 +250,14 @@
             <select id="jobSelector" class="header-job-select" onchange="loadJob(this.value)">
                 <option value="">-- Load Job --</option>
             </select>
-            <button id="authBtn" class="auth-btn" onclick="toggleAuth()">🔒 Viewer</button>
+            
+            <!-- Edit / Delete Job Buttons -->
+            <span id="jobActionBtns" style="display: none; align-items: center; gap: 2px; margin-left: 4px;">
+                <button style="background: none; border: none; cursor: pointer; font-size: 16px; padding: 0;" onclick="renameCurrentJob()" title="Rename Job">✏️</button>
+                <button style="background: none; border: none; cursor: pointer; font-size: 16px; padding: 0;" onclick="deleteCurrentJob()" title="Delete Job">🗑️</button>
+            </span>
+
+            <button id="authBtn" class="auth-btn" style="margin-left: 8px;" onclick="toggleAuth()">🔒 Viewer</button>
         </div>
     </div>
     
@@ -837,7 +849,10 @@
                 document.querySelectorAll('.info-input').forEach(input => input.value = "");
                 document.getElementById('prepNotes').value = ""; document.getElementById('loadNotes').value = "";
                 document.getElementById('prepTableBody').innerHTML = ""; document.getElementById('loadTableBody').innerHTML = "";
-                removeMarkingImage(); document.getElementById('shareBtn').style.display = 'none';
+                removeMarkingImage(); 
+                document.getElementById('shareBtn').style.display = 'none';
+                document.getElementById('jobActionBtns').style.display = 'none'; // Hide edit/delete job icons
+                
                 stdColsState = { truck: { exists: true, name: "Truck No" }, jumbo: { exists: true, name: "Jumbo" }, bags: { exists: true, name: "50 Kgs Bags" } };
                 restoreStdColsUI(); document.querySelectorAll('.dyn-col').forEach(el => el.remove());
                 dynColCount = 0; prepRowCount = 0; loadRowCount = 0;
@@ -895,6 +910,7 @@
                 currentJobId = jobNo; 
                 updateJobDropdown();
                 document.getElementById('shareBtn').style.display = 'inline-block';
+                document.getElementById('jobActionBtns').style.display = 'flex'; // Show edit/delete job icons
                 saveBtn.innerText = "💾 SAVE TO CLOUD";
                 alert("Job Saved to Cloud Successfully! ☁️✅");
                 toggleMenu();
@@ -956,7 +972,10 @@
                     if(job.loadData) job.loadData.forEach(row => addLoadRow(row)); 
                     
                     updateSummary(); 
-                    if(isAdmin) document.getElementById('shareBtn').style.display = 'inline-block';
+                    if(isAdmin) {
+                        document.getElementById('shareBtn').style.display = 'inline-block';
+                        document.getElementById('jobActionBtns').style.display = 'flex'; // Show edit/delete job icons
+                    }
                     document.getElementById("sideMenu").classList.remove("open");
                     document.getElementById("menuOverlay").classList.remove("open");
                     
@@ -967,6 +986,55 @@
             });
         }
 
+        // ==========================================
+        // 14. EDIT / DELETE CURRENT JOB
+        // ==========================================
+        function renameCurrentJob() {
+            if(!currentJobId) return;
+            let newJobNo = prompt("Enter new Job No to rename:", currentJobId);
+            if(newJobNo && newJobNo !== currentJobId) {
+                if(confirm("Are you sure you want to rename job '" + currentJobId + "' to '" + newJobNo + "'?")) {
+                    db.ref('jobs/' + currentJobId).once('value').then((snapshot) => {
+                        let data = snapshot.val();
+                        if(data) {
+                            data.info.jobNo = newJobNo; // Update internal jobNo
+                            db.ref('jobs/' + newJobNo).set(data).then(() => {
+                                db.ref('jobs/' + currentJobId).remove(); // Delete old record
+                                currentJobId = newJobNo;
+                                document.getElementById('infoJobNo').value = newJobNo;
+                                updateJobDropdown();
+                                alert("Job Renamed Successfully! ✅");
+                            });
+                        }
+                    });
+                }
+            }
+        }
+
+        function deleteCurrentJob() {
+            if(!currentJobId) return;
+            if(confirm("⚠️ Are you sure you want to permanently delete Job: '" + currentJobId + "'?\nThis action cannot be undone!")) {
+                db.ref('jobs/' + currentJobId).remove().then(() => {
+                    alert("Job Deleted Successfully! 🗑️");
+                    currentJobId = null;
+                    document.getElementById('infoJobNo').value = "";
+                    document.getElementById('prepTableBody').innerHTML = ""; 
+                    document.getElementById('loadTableBody').innerHTML = "";
+                    prepRowCount = 0; loadRowCount = 0;
+                    for(let i=0; i<10; i++) addPrepRow(); 
+                    for(let i=0; i<10; i++) addLoadRow();
+                    
+                    updateJobDropdown();
+                    document.getElementById('shareBtn').style.display = 'none';
+                    document.getElementById('jobActionBtns').style.display = 'none';
+                    updateSummary();
+                });
+            }
+        }
+
+        // ==========================================
+        // 15. BACKUP & RESTORE
+        // ==========================================
         async function backupData() {
             db.ref('jobs').once('value').then(snapshot => {
                 let jobsData = JSON.stringify(snapshot.val() || {});
