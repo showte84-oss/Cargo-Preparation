@@ -556,13 +556,75 @@
         function restoreStdColsUI() { document.querySelectorAll('.std-col-truck').forEach(el => { if(stdColsState.truck.exists) el.classList.remove('hidden-col'); else el.classList.add('hidden-col'); }); document.querySelectorAll('.std-col-jumbo').forEach(el => { if(stdColsState.jumbo.exists) el.classList.remove('hidden-col'); else el.classList.add('hidden-col'); }); document.querySelectorAll('.std-col-bags').forEach(el => { if(stdColsState.bags.exists) el.classList.remove('hidden-col'); else el.classList.add('hidden-col'); }); if(document.getElementById('truckColName')) document.getElementById('truckColName').innerText = stdColsState.truck.name; if(document.getElementById('jumboColName')) document.getElementById('jumboColName').innerText = stdColsState.jumbo.name; if(document.getElementById('bagsColName')) document.getElementById('bagsColName').innerText = stdColsState.bags.name; }
 
         function syncOutputFromLoading() {
-            const loadRows = document.getElementById('loadTableBody').getElementsByTagName('tr'); let loadSums = {};
-            for (let i = 0; i < loadRows.length; i++) { let d = loadRows[i].querySelector('.l-date').value.trim(); let b = parseFloat(loadRows[i].querySelector('.l-bags').value) || 0; if(d) { loadSums[d] = (loadSums[d] || 0) + b; } }
-            const prepRows = document.getElementById('prepTableBody').getElementsByTagName('tr');
+            const loadRows = document.getElementById('loadTableBody').getElementsByTagName('tr'); 
+            let loadSums = {};
+            
+            // 1. Loading Tab က Date နဲ့ Bags တွေကို စုစည်းပါမည်
+            if (stdColsState.bags.exists) {
+                for (let i = 0; i < loadRows.length; i++) { 
+                    let d = loadRows[i].querySelector('.l-date').value.trim(); 
+                    let b = parseFloat(loadRows[i].querySelector('.l-bags').value) || 0; 
+                    if(d) { 
+                        loadSums[d] = (loadSums[d] || 0) + b; 
+                    } 
+                }
+            }
+
+            let prepTableBody = document.getElementById('prepTableBody');
+            let prepRows = prepTableBody.getElementsByTagName('tr');
+            let prepDates = [];
+            
+            // 2. Preparation Tab မှာ ရှိပြီးသား Date တွေကို မှတ်သားပါမည်
             for (let i = 0; i < prepRows.length; i++) {
-                let d = prepRows[i].querySelector('.p-date').value.trim(); let outInput = prepRows[i].querySelector('.p-output');
-                if (d && loadSums.hasOwnProperty(d)) { outInput.value = loadSums[d] > 0 ? loadSums[d] : ""; outInput.setAttribute('readonly', 'true'); outInput.style.backgroundColor = '#ffe6e6'; } else { outInput.removeAttribute('readonly'); outInput.style.backgroundColor = 'transparent'; }
-            } calcPrep(); 
+                let d = prepRows[i].querySelector('.p-date').value.trim();
+                if(d) prepDates.push(d);
+            }
+
+            // 3. Loading မှာ Date အသစ်ပါလာပြီး Preparation မှာ မရှိသေးရင် အလိုအလျောက် အစားထိုးပါမည်
+            for (let d in loadSums) {
+                if (!prepDates.includes(d) && loadSums[d] > 0) {
+                    let addedToEmptyRow = false;
+                    
+                    // (က) Preparation မှာ အလွတ်ဖြစ်နေတဲ့ Row ရှိမရှိ အရင်ရှာပြီး Date ကို ထည့်ပါမည်
+                    for (let i = 0; i < prepRows.length; i++) {
+                        let pDateInput = prepRows[i].querySelector('.p-date');
+                        let pDayVal = prepRows[i].querySelector('.p-day').value;
+                        let pNightVal = prepRows[i].querySelector('.p-night').value;
+                        
+                        // Date, Day, Night အားလုံး အလွတ်ဖြစ်နေတဲ့ Row ကို ရှာခြင်း
+                        if (!pDateInput.value.trim() && !pDayVal && !pNightVal) {
+                            pDateInput.value = d;
+                            prepDates.push(d); // မှတ်ထားတဲ့ Date စာရင်းထဲ ထပ်ထည့်ပါမည်
+                            addedToEmptyRow = true;
+                            break; // တစ်ကြောင်းထည့်ပြီးတာနဲ့ ရပ်ပါမည်
+                        }
+                    }
+                    
+                    // (ခ) အလွတ် Row မရှိတော့ရင် Row အသစ်တစ်ခုကို အလိုအလျောက် ဖန်တီးပါမည်
+                    if (!addedToEmptyRow) {
+                        addPrepRow({ date: d, day: "", night: "", output: "" });
+                        // Row အသစ်ထပ်ထည့်လိုက်တဲ့အတွက် prepRows ကို Update ပြန်လုပ်ပါမည်
+                        prepRows = prepTableBody.getElementsByTagName('tr');
+                    }
+                }
+            }
+
+            // 4. Data တွေကို Preparation ဘက်ကို ချိတ်ဆက်ထည့်သွင်းပါမည်
+            for (let i = 0; i < prepRows.length; i++) {
+                let d = prepRows[i].querySelector('.p-date').value.trim(); 
+                let outInput = prepRows[i].querySelector('.p-output');
+                
+                if (d && loadSums.hasOwnProperty(d) && loadSums[d] > 0) { 
+                    outInput.value = loadSums[d]; 
+                    outInput.setAttribute('readonly', 'true'); 
+                    outInput.style.backgroundColor = '#ffe6e6'; 
+                } else { 
+                    outInput.value = ""; 
+                    outInput.removeAttribute('readonly'); 
+                    outInput.style.backgroundColor = 'transparent'; 
+                }
+            } 
+            calcPrep(); 
         }
 
         function addLoadRow(data = null) {
