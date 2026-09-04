@@ -2,12 +2,15 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
     <title>Cargo Log Web App</title>
     
     <!-- Firebase SDK (v8) -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
+    <!-- Excel Export Library (With Styling Support) -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
 
     <style>
         body { font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: #f4f4f9; display: flex; flex-direction: column; height: 100vh; }
@@ -34,7 +37,7 @@
         .icon-action-btn { background: transparent; border: none; font-size: 18px; cursor: pointer; padding: 0 2px; transition: transform 0.1s; }
         .icon-action-btn:active { transform: scale(0.9); }
 
-        /* Mobile Screen Adjustments (Fix for elements going off-screen) */
+        /* Mobile Adjustments */
         @media (max-width: 550px) { 
             .app-title { display: none; } 
             .header-bar { padding: 8px 4px; } 
@@ -61,6 +64,7 @@
         .btn-new { background-color: #27ae60; }
         .btn-save { background-color: #2980b9; }
         .btn-saveas { background-color: #8e44ad; }
+        .btn-excel { background-color: #1abc9c; }
         .btn-backup { background-color: #f39c12; }
         .btn-backup-tg { background-color: #3498db; }
         .btn-restore { background-color: #d35400; }
@@ -98,10 +102,9 @@
         .tab-btn.active { background-color: #0b57d0; color: white; border-color: #0b57d0; }
 
         /* Data Section & Tables */
-        .data-section { background: white; padding: 5px; margin: 0 5px 5px 5px; overflow-x: auto; border: 1px solid #ccc; border-top: 3px solid #0b57d0; border-radius: 0 0 6px 6px; flex-grow: 1; }
+        .data-section { background: white; padding: 5px; margin: 0 5px 5px 5px; overflow-x: auto; border: 1px solid #ccc; border-top: 3px solid #0b57d0; border-radius: 0 0 6px 6px; flex-grow: 1; position: relative; }
         
         .data-table { border-collapse: collapse; width: 100%; min-width: 600px; text-align: center; table-layout: fixed; }
-        
         .data-table th, .data-table td { border: 1px solid #555; padding: 0; height: 32px; vertical-align: middle; box-sizing: border-box; }
         .data-table th { padding: 4px; font-size: 12px; position: relative; }
         .data-table input, .data-table select { width: 100%; height: 100%; box-sizing: border-box; border: none; text-align: center; font-size: 13px; padding: 4px; background: transparent; outline: none; }
@@ -120,12 +123,12 @@
         .edit-mode-active .resizer { display: block; background-color: rgba(231, 76, 60, 0.2); border-right: 2px solid #e74c3c; }
         .resizer:hover, .resizer.resizing { background-color: rgba(231, 76, 60, 0.8); }
 
-        .prep-th { background-color: #00b0f0; color: black; font-weight: bold; }
+        .prep-th { background-color: #FFC000; color: black; font-weight: bold; }
         .output-col { color: red; font-weight: bold; }
         .balance-col { background-color: #00b050; color: white; font-weight: bold; }
-        .load-th { background-color: yellow; color: black; font-weight: bold; }
-        .load-total-row { background-color: blue; color: white; font-weight: bold; font-size: 12px; }
-        .load-green-col { background-color: lime; color: black; font-weight: bold; }
+        .load-th { background-color: #FFC000; color: black; font-weight: bold; }
+        .load-total-row { background-color: #00B0F0; color: white; font-weight: bold; font-size: 12px; }
+        .load-green-col { background-color: #00B0F0; color: black; font-weight: bold; }
 
         .notes-section { margin-top: 10px; }
         .notes-section textarea { width: 100%; height: 80px; padding: 8px; border: 1px solid #ccc; box-sizing: border-box; font-size: 13px; font-family: inherit; }
@@ -138,6 +141,15 @@
         .btn-delete { padding: 8px 12px; background-color: #e74c3c; color: white; border: none; cursor: pointer; border-radius: 4px; font-weight: bold; font-size: 12px; }
         
         .col-no { width: 40px; } .col-date { width: 80px; } .col-num { width: 70px; } .hidden-col { display: none !important; }
+
+        /* Floating Auto-Hide Zoom Controls */
+        .zoom-container { position: fixed; bottom: 20px; right: 20px; z-index: 1000; display: flex; flex-direction: column; align-items: center; gap: 8px; }
+        .zoom-main-btn { background: #3498db; color: white; border: 2px solid white; width: 45px; height: 45px; border-radius: 50%; font-size: 20px; box-shadow: 0 4px 8px rgba(0,0,0,0.3); cursor: pointer; display: flex; justify-content: center; align-items: center; transition: all 0.3s; opacity: 0.6; }
+        .zoom-main-btn.active { opacity: 1; background: #e74c3c; }
+        .zoom-actions { display: flex; flex-direction: column; gap: 8px; opacity: 0; visibility: hidden; transform: translateY(20px); transition: all 0.3s ease; }
+        .zoom-actions.show { opacity: 1; visibility: visible; transform: translateY(0); }
+        .zoom-actions button { background: #2c3e50; color: white; border: 2px solid white; width: 40px; height: 40px; border-radius: 50%; font-size: 16px; font-weight: bold; box-shadow: 0 4px 8px rgba(0,0,0,0.3); cursor: pointer; display: flex; justify-content: center; align-items: center; transition: background 0.2s; }
+        .zoom-actions button:active { background: #34495e; transform: scale(0.95); }
 
         /* VIEWER MODE RESTRICTIONS */
         body.viewer-mode .btn-add, body.viewer-mode .btn-delete, body.viewer-mode .top-action-bar,
@@ -175,6 +187,16 @@
         </div>
     </div>
     
+    <!-- Zoom Controls (Auto-Hide) -->
+    <div class="zoom-container">
+        <div class="zoom-actions" id="zoomActions">
+            <button onclick="zoomUI(0.1)" title="Zoom In">➕</button>
+            <button onclick="zoomUI(0)" title="Reset Zoom" style="font-size: 14px;">🔄</button>
+            <button onclick="zoomUI(-0.1)" title="Zoom Out">➖</button>
+        </div>
+        <button class="zoom-main-btn" id="zoomMainBtn" onclick="toggleZoomMenu()" title="Zoom Menu">🔍</button>
+    </div>
+    
     <!-- Simplified Settings Modal -->
     <div id="settingsModal" class="settings-modal">
         <div class="settings-content">
@@ -208,7 +230,9 @@
         <button class="btn-new" onclick="newJob()">+ NEW JOB</button>
         <button class="btn-save" id="menuSaveBtn" onclick="saveJob()">💾 SAVE TO CLOUD</button>
         <button class="btn-saveas" onclick="saveAsJob()">💾 SAVE AS...</button>
-        <hr style="border: 0; border-top: 1px solid #555; width: 100%;">
+        <hr style="border: 0; border-top: 1px solid #555; width: 100%; margin: 5px 0;">
+        <button class="btn-excel" onclick="exportToExcel()">📊 EXPORT TO EXCEL</button>
+        <hr style="border: 0; border-top: 1px solid #555; width: 100%; margin: 5px 0;">
         <button class="btn-backup" onclick="backupData()">⬇ LOCAL BACKUP</button>
         <button class="btn-restore" onclick="document.getElementById('restoreFile').click()">⬆ RESTORE</button>
         <button class="btn-backup-tg" id="tgBackupBtn" onclick="telegramBackup()">☁️ TELEGRAM BACKUP</button>
@@ -253,15 +277,15 @@
                 <thead>
                     <tr>
                         <th class="col-no prep-th">No</th><th class="col-date prep-th">Date</th><th class="col-num prep-th">Day</th><th class="col-num prep-th">Night</th>
-                        <th class="col-num prep-th">D/N Total</th><th class="col-num prep-th">Grand Total</th><th class="col-num output-col" style="background-color: red; color: white;">Loading</th><th class="col-num balance-col">Balance</th>
+                        <th class="col-num prep-th">D/N Total</th><th class="col-num prep-th">Grand Total</th><th class="col-num output-col" style="color: white; background-color: #FFC000;">Output</th><th class="col-num balance-col" style="background-color: #FFC000; color: black;">Balance</th>
                     </tr>
                 </thead>
                 <tbody id="prepTableBody"></tbody>
                 <tfoot>
-                    <tr style="font-weight: bold; background-color: #f9f9f9; font-size:13px;">
+                    <tr class="load-total-row">
                         <td colspan="4" style="text-align: right; padding-right: 10px;">Total</td>
-                        <td id="prepTotalDN"></td><td id="prepGrandTotal">0</td>
-                        <td id="prepTotalOutput" class="output-col" style="background-color: red; color: white;">0</td><td id="prepFinalBalance" class="balance-col">0</td>
+                        <td id="prepTotalDN">0</td><td id="prepGrandTotal">0</td>
+                        <td id="prepTotalOutput" class="output-col" style="color: white;">0</td><td id="prepFinalBalance" class="balance-col">0</td>
                     </tr>
                 </tfoot>
             </table>
@@ -287,7 +311,7 @@
                 <tfoot id="loadTfoot">
                     <tr class="load-total-row">
                         <td colspan="3" style="text-align: right; padding-right: 10px;">Total</td>
-                        <td class="std-col-truck" style="background-color: blue;"></td><td id="loadTotalJumbo" class="load-green-col std-col-jumbo">0</td><td id="loadTotalBags" class="load-green-col std-col-bags">0</td><td class="std-col-remark" style="background-color: lime;"></td>
+                        <td class="std-col-truck"></td><td id="loadTotalJumbo" class="load-green-col std-col-jumbo">0</td><td id="loadTotalBags" class="load-green-col std-col-bags">0</td><td class="std-col-remark"></td>
                     </tr>
                 </tfoot>
             </table>
@@ -331,7 +355,49 @@
         });
 
         // ==========================================
-        // 2. HARDCODED FIREBASE SETUP
+        // 2. AUTO-HIDE ZOOM FUNCTIONALITY
+        // ==========================================
+        let currentZoom = 1.0;
+        let zoomHideTimer;
+
+        function toggleZoomMenu() {
+            const actions = document.getElementById('zoomActions');
+            const mainBtn = document.getElementById('zoomMainBtn');
+            
+            actions.classList.toggle('show');
+            mainBtn.classList.toggle('active');
+            
+            if (actions.classList.contains('show')) {
+                startZoomTimer();
+            } else {
+                clearTimeout(zoomHideTimer);
+            }
+        }
+
+        function startZoomTimer() {
+            clearTimeout(zoomHideTimer);
+            zoomHideTimer = setTimeout(() => {
+                document.getElementById('zoomActions').classList.remove('show');
+                document.getElementById('zoomMainBtn').classList.remove('active');
+            }, 4000); 
+        }
+
+        function zoomUI(step) {
+            if(step === 0) { currentZoom = 1.0; } 
+            else { currentZoom += step; }
+            
+            if(currentZoom < 0.5) currentZoom = 0.5;
+            if(currentZoom > 2.5) currentZoom = 2.5;
+            
+            document.querySelectorAll('.data-table').forEach(el => {
+                el.style.zoom = currentZoom;
+                el.style.transformOrigin = "top left";
+            });
+            startZoomTimer(); 
+        }
+
+        // ==========================================
+        // 3. HARDCODED FIREBASE SETUP
         // ==========================================
         const firebaseConfig = {
             apiKey: "AIzaSyCwERD6t6xnneFjWIvbp9IaOnN2uPoBBM4",
@@ -347,7 +413,7 @@
         const db = firebase.database();
 
         // ==========================================
-        // 3. SETTINGS & AUTH
+        // 4. SETTINGS & AUTH
         // ==========================================
         function getAdminPass() { return localStorage.getItem('adminPass') || "123456"; }
         
@@ -395,9 +461,6 @@
             if (navigator.clipboard && window.isSecureContext) { navigator.clipboard.writeText(url).then(() => { alert("Link Copied!"); }).catch(err => { prompt("Copy link:", url); }); } else { prompt("Copy link:", url); }
         }
 
-        // ==========================================
-        // 4. AUTO-SAVE DRAFT (PROTECTS AGAINST REFRESH)
-        // ==========================================
         setInterval(() => {
             if (isAdmin && hasUnsavedChanges) {
                 let state = getJobState();
@@ -405,9 +468,6 @@
             }
         }, 2000);
 
-        // ==========================================
-        // 5. INITIALIZATION & ROUTING
-        // ==========================================
         window.onload = function() {
             const urlParams = new URLSearchParams(window.location.search);
             const targetJob = urlParams.get('job');
@@ -421,7 +481,6 @@
                     isAdmin = true; document.body.classList.remove('viewer-mode');
                     const authBtn = document.getElementById('authBtn'); authBtn.innerText = "🔓 Admin"; authBtn.classList.add('unlocked');
                 }
-                
                 updateJobDropdown();
 
                 let draftStr = localStorage.getItem('cargoDraftState');
@@ -433,25 +492,17 @@
                         document.getElementById('jobSelector').value = draft.id || "";
                         hasUnsavedChanges = true;
                         if(isAdmin && currentJobId) { document.getElementById('shareBtn').style.display = 'inline-block'; document.getElementById('jobActionBtns').style.display = 'flex'; }
-                        initResizableColumns();
-                        return;
+                        initResizableColumns(); return;
                     } catch(e){}
                 }
 
                 let lastJob = localStorage.getItem('lastActiveJob');
-                if(lastJob) {
-                    loadJob(lastJob, true);
-                } else {
-                    for(let i=0; i<10; i++) addPrepRow(); 
-                    for(let i=0; i<10; i++) addLoadRow();
-                }
+                if(lastJob) { loadJob(lastJob, true); } 
+                else { for(let i=0; i<10; i++) addPrepRow(); for(let i=0; i<10; i++) addLoadRow(); }
             }
             initResizableColumns();
         };
 
-        // ==========================================
-        // 6. UI CLEAN & APPLY
-        // ==========================================
         function clearAppUI() {
             hasUnsavedChanges = false;
             document.querySelectorAll('.info-input').forEach(input => input.value = "");
@@ -485,9 +536,6 @@
             initResizableColumns(); 
         }
 
-        // ==========================================
-        // 7. MENU & LAYOUT LOGIC
-        // ==========================================
         function toggleMenu() { document.getElementById("sideMenu").classList.toggle("open"); document.getElementById("menuOverlay").classList.toggle("open"); }
         function openTab(evt, tabName) { let tabcontent = document.getElementsByClassName("tab-content"); for (let i = 0; i < tabcontent.length; i++) tabcontent[i].classList.remove("active"); let tabbtns = document.getElementsByClassName("tab-btn"); for (let i = 0; i < tabbtns.length; i++) tabbtns[i].classList.remove("active"); document.getElementById(tabName).classList.add("active"); evt.currentTarget.classList.add("active"); if (tabName === 'Loading') document.getElementById('topInfoSection').style.display = 'none'; else document.getElementById('topInfoSection').style.display = 'block'; updateSummary(); }
         function toggleTableEdit() {
@@ -517,9 +565,6 @@
         function handlePressEnd() { clearTimeout(pressTimer); if(previewBoxEl) previewBoxEl.style.display = 'none'; }
         document.addEventListener('touchstart', handlePressStart, {passive: true}); document.addEventListener('touchend', handlePressEnd); document.addEventListener('touchcancel', handlePressEnd); document.addEventListener('touchmove', handlePressEnd, {passive: true});  document.addEventListener('mousedown', handlePressStart); document.addEventListener('mouseup', handlePressEnd);
 
-        // ==========================================
-        // 8. DATA LOGIC (TABLES & IMAGE)
-        // ==========================================
         function triggerMarkingInput() { if(isAdmin) document.getElementById('markingImageInput').click(); }
         function handleImageUpload(event) {
             const file = event.target.files[0];
@@ -556,75 +601,13 @@
         function restoreStdColsUI() { document.querySelectorAll('.std-col-truck').forEach(el => { if(stdColsState.truck.exists) el.classList.remove('hidden-col'); else el.classList.add('hidden-col'); }); document.querySelectorAll('.std-col-jumbo').forEach(el => { if(stdColsState.jumbo.exists) el.classList.remove('hidden-col'); else el.classList.add('hidden-col'); }); document.querySelectorAll('.std-col-bags').forEach(el => { if(stdColsState.bags.exists) el.classList.remove('hidden-col'); else el.classList.add('hidden-col'); }); if(document.getElementById('truckColName')) document.getElementById('truckColName').innerText = stdColsState.truck.name; if(document.getElementById('jumboColName')) document.getElementById('jumboColName').innerText = stdColsState.jumbo.name; if(document.getElementById('bagsColName')) document.getElementById('bagsColName').innerText = stdColsState.bags.name; }
 
         function syncOutputFromLoading() {
-            const loadRows = document.getElementById('loadTableBody').getElementsByTagName('tr'); 
-            let loadSums = {};
-            
-            // 1. Loading Tab က Date နဲ့ Bags တွေကို စုစည်းပါမည်
-            if (stdColsState.bags.exists) {
-                for (let i = 0; i < loadRows.length; i++) { 
-                    let d = loadRows[i].querySelector('.l-date').value.trim(); 
-                    let b = parseFloat(loadRows[i].querySelector('.l-bags').value) || 0; 
-                    if(d) { 
-                        loadSums[d] = (loadSums[d] || 0) + b; 
-                    } 
-                }
-            }
-
-            let prepTableBody = document.getElementById('prepTableBody');
-            let prepRows = prepTableBody.getElementsByTagName('tr');
-            let prepDates = [];
-            
-            // 2. Preparation Tab မှာ ရှိပြီးသား Date တွေကို မှတ်သားပါမည်
+            const loadRows = document.getElementById('loadTableBody').getElementsByTagName('tr'); let loadSums = {};
+            for (let i = 0; i < loadRows.length; i++) { let d = loadRows[i].querySelector('.l-date').value.trim(); let b = parseFloat(loadRows[i].querySelector('.l-bags').value) || 0; if(d) { loadSums[d] = (loadSums[d] || 0) + b; } }
+            const prepRows = document.getElementById('prepTableBody').getElementsByTagName('tr');
             for (let i = 0; i < prepRows.length; i++) {
-                let d = prepRows[i].querySelector('.p-date').value.trim();
-                if(d) prepDates.push(d);
-            }
-
-            // 3. Loading မှာ Date အသစ်ပါလာပြီး Preparation မှာ မရှိသေးရင် အလိုအလျောက် အစားထိုးပါမည်
-            for (let d in loadSums) {
-                if (!prepDates.includes(d) && loadSums[d] > 0) {
-                    let addedToEmptyRow = false;
-                    
-                    // (က) Preparation မှာ အလွတ်ဖြစ်နေတဲ့ Row ရှိမရှိ အရင်ရှာပြီး Date ကို ထည့်ပါမည်
-                    for (let i = 0; i < prepRows.length; i++) {
-                        let pDateInput = prepRows[i].querySelector('.p-date');
-                        let pDayVal = prepRows[i].querySelector('.p-day').value;
-                        let pNightVal = prepRows[i].querySelector('.p-night').value;
-                        
-                        // Date, Day, Night အားလုံး အလွတ်ဖြစ်နေတဲ့ Row ကို ရှာခြင်း
-                        if (!pDateInput.value.trim() && !pDayVal && !pNightVal) {
-                            pDateInput.value = d;
-                            prepDates.push(d); // မှတ်ထားတဲ့ Date စာရင်းထဲ ထပ်ထည့်ပါမည်
-                            addedToEmptyRow = true;
-                            break; // တစ်ကြောင်းထည့်ပြီးတာနဲ့ ရပ်ပါမည်
-                        }
-                    }
-                    
-                    // (ခ) အလွတ် Row မရှိတော့ရင် Row အသစ်တစ်ခုကို အလိုအလျောက် ဖန်တီးပါမည်
-                    if (!addedToEmptyRow) {
-                        addPrepRow({ date: d, day: "", night: "", output: "" });
-                        // Row အသစ်ထပ်ထည့်လိုက်တဲ့အတွက် prepRows ကို Update ပြန်လုပ်ပါမည်
-                        prepRows = prepTableBody.getElementsByTagName('tr');
-                    }
-                }
-            }
-
-            // 4. Data တွေကို Preparation ဘက်ကို ချိတ်ဆက်ထည့်သွင်းပါမည်
-            for (let i = 0; i < prepRows.length; i++) {
-                let d = prepRows[i].querySelector('.p-date').value.trim(); 
-                let outInput = prepRows[i].querySelector('.p-output');
-                
-                if (d && loadSums.hasOwnProperty(d) && loadSums[d] > 0) { 
-                    outInput.value = loadSums[d]; 
-                    outInput.setAttribute('readonly', 'true'); 
-                    outInput.style.backgroundColor = '#ffe6e6'; 
-                } else { 
-                    outInput.value = ""; 
-                    outInput.removeAttribute('readonly'); 
-                    outInput.style.backgroundColor = 'transparent'; 
-                }
-            } 
-            calcPrep(); 
+                let d = prepRows[i].querySelector('.p-date').value.trim(); let outInput = prepRows[i].querySelector('.p-output');
+                if (d && loadSums.hasOwnProperty(d)) { outInput.value = loadSums[d] > 0 ? loadSums[d] : ""; outInput.setAttribute('readonly', 'true'); outInput.style.backgroundColor = '#ffe6e6'; } else { outInput.removeAttribute('readonly'); outInput.style.backgroundColor = 'transparent'; }
+            } calcPrep(); 
         }
 
         function addLoadRow(data = null) {
@@ -677,10 +660,6 @@
             return state;
         }
 
-        // ==========================================
-        // 9. CLOUD SYSTEM & DROPDOWN (RESTORED)
-        // ==========================================
-        
         function updateJobDropdown() {
             db.ref('jobs').once('value').then((snapshot) => {
                 const jobs = snapshot.val() || {}; 
@@ -696,64 +675,36 @@
 
         function loadJob(jobNo, isAutoLoad = false) {
             if(!jobNo) return;
-            
-            if(!isAutoLoad && hasUnsavedChanges) {
-                if(!confirm("⚠️ You have unsaved changes. Are you sure you want to switch jobs? Unsaved data will be lost.")) {
-                    document.getElementById('jobSelector').value = currentJobId || "";
-                    return;
-                }
-            }
+            if(!isAutoLoad && hasUnsavedChanges) { if(!confirm("⚠️ You have unsaved changes. Are you sure you want to switch jobs? Unsaved data will be lost.")) { document.getElementById('jobSelector').value = currentJobId || ""; return; } }
 
             db.ref('jobs/' + jobNo).once('value').then((snapshot) => {
                 let job = snapshot.val();
                 if(job) {
-                    currentJobId = jobNo;
-                    localStorage.setItem('lastActiveJob', jobNo); 
-                    hasUnsavedChanges = false;
-                    localStorage.removeItem('cargoDraftState');
-                    
-                    applyJobStateToUI(job);
-
-                    document.getElementById('jobSelector').value = jobNo; 
+                    currentJobId = jobNo; localStorage.setItem('lastActiveJob', jobNo); hasUnsavedChanges = false; localStorage.removeItem('cargoDraftState');
+                    applyJobStateToUI(job); document.getElementById('jobSelector').value = jobNo; 
                     if(isAdmin) { document.getElementById('shareBtn').style.display = 'inline-block'; document.getElementById('jobActionBtns').style.display = 'flex'; }
                     document.getElementById("sideMenu").classList.remove("open"); document.getElementById("menuOverlay").classList.remove("open");
-                } else { 
-                    if(!isAutoLoad) alert("Job not found in Cloud Database."); 
-                    else localStorage.removeItem('lastActiveJob');
-                }
+                } else { if(!isAutoLoad) alert("Job not found."); else localStorage.removeItem('lastActiveJob'); }
             });
         }
 
         function newJob() {
             if(hasUnsavedChanges) { if(!confirm("⚠️ You have unsaved changes! Create NEW job anyway? Data will be lost.")) return; } 
             else { if(!confirm("Create NEW job?")) return; }
-            
-            currentJobId = null; 
-            localStorage.removeItem('cargoDraftState'); 
-            localStorage.removeItem('lastActiveJob');
-            toggleMenu(); clearAppUI();
-            document.getElementById('jobSelector').value = ""; 
+            currentJobId = null; localStorage.removeItem('cargoDraftState'); localStorage.removeItem('lastActiveJob');
+            toggleMenu(); clearAppUI(); document.getElementById('jobSelector').value = ""; 
         }
 
         function saveJob() {
             let jobNo = document.getElementById('infoJobNo').value.trim();
             if(!jobNo) { alert("Please enter a JOB NO to save."); return; }
             let state = getJobState();
-            
             const saveBtn = document.getElementById('menuSaveBtn'); saveBtn.innerText = "⏳ SAVING...";
 
             db.ref('jobs/' + jobNo).set(state).then(() => {
-                currentJobId = jobNo; 
-                localStorage.setItem('lastActiveJob', jobNo);
-                hasUnsavedChanges = false; 
-                localStorage.removeItem('cargoDraftState'); 
-                
-                updateJobDropdown();
-                document.getElementById('shareBtn').style.display = 'inline-block'; 
-                document.getElementById('jobActionBtns').style.display = 'flex'; 
-                saveBtn.innerText = "💾 SAVE TO CLOUD"; 
-                alert("Job Saved Successfully! ☁️✅"); 
-                toggleMenu();
+                currentJobId = jobNo; localStorage.setItem('lastActiveJob', jobNo); hasUnsavedChanges = false; localStorage.removeItem('cargoDraftState'); 
+                updateJobDropdown(); document.getElementById('shareBtn').style.display = 'inline-block'; document.getElementById('jobActionBtns').style.display = 'flex'; 
+                saveBtn.innerText = "💾 SAVE TO CLOUD"; alert("Job Saved Successfully! ☁️✅"); toggleMenu();
             }).catch(e => { alert("Error saving: " + e.message); saveBtn.innerText = "💾 SAVE TO CLOUD"; });
         }
 
@@ -770,11 +721,7 @@
                             data.info.jobNo = newJobNo; 
                             db.ref('jobs/' + newJobNo).set(data).then(() => {
                                 db.ref('jobs/' + currentJobId).remove().then(() => {
-                                    currentJobId = newJobNo; 
-                                    localStorage.setItem('lastActiveJob', newJobNo);
-                                    document.getElementById('infoJobNo').value = newJobNo;
-                                    updateJobDropdown(); 
-                                    alert("Job Renamed Successfully! ✅");
+                                    currentJobId = newJobNo; localStorage.setItem('lastActiveJob', newJobNo); document.getElementById('infoJobNo').value = newJobNo; updateJobDropdown(); alert("Job Renamed Successfully! ✅");
                                 });
                             }).catch(err => alert("Error saving renamed job: " + err.message));
                         }
@@ -789,44 +736,26 @@
                 let jobToDelete = currentJobId;
                 db.ref('jobs/' + jobToDelete).remove().then(() => {
                     alert("Job Deleted Successfully! 🗑️");
-                    currentJobId = null;
-                    localStorage.removeItem('cargoDraftState'); 
-                    localStorage.removeItem('lastActiveJob');
-                    
-                    let select = document.getElementById('jobSelector');
-                    for (let i = 0; i < select.options.length; i++) {
-                        if (select.options[i].value === jobToDelete) {
-                            select.remove(i); break;
-                        }
-                    }
-                    select.value = ""; 
-                    clearAppUI(); 
-                    updateJobDropdown();
+                    currentJobId = null; localStorage.removeItem('cargoDraftState'); localStorage.removeItem('lastActiveJob');
+                    let select = document.getElementById('jobSelector'); for (let i = 0; i < select.options.length; i++) { if (select.options[i].value === jobToDelete) { select.remove(i); break; } } select.value = ""; 
+                    clearAppUI(); updateJobDropdown();
                 }).catch(err => { alert("Error deleting job: \n" + err.message); });
             }
         }
 
-        // ==========================================
-        // 10. BACKUP & RESTORE
-        // ==========================================
         async function backupData() {
             db.ref('jobs').once('value').then(snapshot => {
-                let jobsData = JSON.stringify(snapshot.val() || {});
-                if(jobsData === "{}") { alert("No data to backup."); return; }
+                let jobsData = JSON.stringify(snapshot.val() || {}); if(jobsData === "{}") { alert("No data to backup."); return; }
                 const blob = new Blob([jobsData], { type: "application/json" }); const url = URL.createObjectURL(blob); const a = document.createElement("a"); a.href = url; a.download = "cargo_jobs_cloud_backup_" + new Date().toISOString().slice(0,10) + ".json"; document.body.appendChild(a); a.click(); document.body.removeChild(a);
             });
         }
 
         async function telegramBackup() {
             db.ref('jobs').once('value').then(async (snapshot) => {
-                let jobsData = JSON.stringify(snapshot.val() || {});
-                if(jobsData === "{}") { alert("No data to backup."); return; }
-                
+                let jobsData = JSON.stringify(snapshot.val() || {}); if(jobsData === "{}") { alert("No data to backup."); return; }
                 let token = localStorage.getItem('tgBotToken'); let chatId = localStorage.getItem('tgChatId');
                 if(!token || !chatId) { alert("Configure Telegram Bot in Settings first."); if(isAdmin) openSettings(); return; }
-
                 let file = new File([jobsData], "cargo_cloud_backup.json", { type: "application/json" }); let formData = new FormData(); formData.append('chat_id', chatId); formData.append('document', file); formData.append('caption', '📦 Cargo Log Cloud Backup\n📅 Date: ' + new Date().toLocaleString());
-
                 let btn = document.getElementById('tgBackupBtn');
                 try { btn.innerText = "⏳ SENDING..."; let response = await fetch(`https://api.telegram.org/bot${token}/sendDocument`, { method: 'POST', body: formData }); let resData = await response.json(); if(resData.ok) { alert("Backup sent to Telegram Cloud! ☁️✅"); } else { alert("Failed: " + resData.description); } } catch(e) { alert("Network error while sending to Telegram."); } finally { btn.innerText = "☁️ TELEGRAM BACKUP"; }
             });
@@ -834,49 +763,164 @@
 
         function restoreData(event) {
             if(!isAdmin) { alert("Please login as Admin to restore data."); document.getElementById('restoreFile').value = ""; return; }
-            
-            const file = event.target.files[0]; 
-            if (!file) return; 
-            
-            const restoreBtn = document.querySelector('.btn-restore');
-            const originalText = restoreBtn.innerText;
-            restoreBtn.innerText = "⏳ RESTORING...";
-            
+            const file = event.target.files[0]; if (!file) return; const restoreBtn = document.querySelector('.btn-restore'); const originalText = restoreBtn.innerText; restoreBtn.innerText = "⏳ RESTORING...";
             const reader = new FileReader();
             reader.onload = function(e) {
                 try { 
                     const importedJobs = JSON.parse(e.target.result); 
-                    
                     db.ref('jobs').set(importedJobs).then(() => { 
-                        updateJobDropdown(); 
-                        toggleMenu(); 
-                        alert("Data restored successfully to Cloud Database! ☁️✅"); 
-                        
-                        let jobKeys = Object.keys(importedJobs);
-                        if(jobKeys.length > 0) { 
-                            loadJob(jobKeys[jobKeys.length - 1], true); 
-                        } 
-                    }).catch(err => {
-                        alert("Restore failed. Check your internet connection.\nError: " + err.message);
-                    }).finally(() => {
-                        restoreBtn.innerText = originalText;
-                    });
-                    
-                } catch (err) { 
-                    alert("Invalid Backup File! Error: " + err.message); 
-                    restoreBtn.innerText = originalText;
-                }
-                
+                        updateJobDropdown(); toggleMenu(); alert("Data restored successfully to Cloud Database! ☁️✅"); 
+                        let jobKeys = Object.keys(importedJobs); if(jobKeys.length > 0) { loadJob(jobKeys[jobKeys.length - 1], true); } 
+                    }).catch(err => { alert("Restore failed. Check your internet connection.\nError: " + err.message); }).finally(() => { restoreBtn.innerText = originalText; });
+                } catch (err) { alert("Invalid Backup File! Error: " + err.message); restoreBtn.innerText = originalText; }
                 document.getElementById('restoreFile').value = ""; 
             }; 
-            
-            reader.onerror = function() {
-                alert("Error reading file!");
-                restoreBtn.innerText = originalText;
-                document.getElementById('restoreFile').value = ""; 
-            };
-            
+            reader.onerror = function() { alert("Error reading file!"); restoreBtn.innerText = originalText; document.getElementById('restoreFile').value = ""; };
             reader.readAsText(file);
+        }
+
+        // ==========================================
+        // 11. EXPORT TO EXCEL WITH EXACT STYLES (Summary Sheet Fix)
+        // ==========================================
+        function getTableDataForExcel(tableId) {
+            let table = document.getElementById(tableId);
+            let data = [];
+            let thead = table.querySelector('thead');
+            let headerRow = [];
+            thead.querySelectorAll('th').forEach(th => {
+                if(!th.classList.contains('hidden-col') && th.style.display !== 'none') {
+                    let text = th.querySelector('.col-name-span') ? th.querySelector('.col-name-span').innerText : th.innerText;
+                    headerRow.push(text.trim().replace(/✎|✖/g, ""));
+                }
+            });
+            data.push(headerRow);
+
+            let tbody = table.querySelector('tbody');
+            tbody.querySelectorAll('tr').forEach(tr => {
+                let row = [];
+                tr.querySelectorAll('td').forEach(td => {
+                    if(!td.classList.contains('hidden-col') && td.style.display !== 'none') {
+                        let input = td.querySelector('input, select');
+                        row.push(input ? input.value : td.innerText);
+                    }
+                });
+                data.push(row);
+            });
+
+            let tfoot = table.querySelector('tfoot');
+            if(tfoot) {
+                let tfootRows = tfoot.querySelectorAll('tr');
+                tfootRows.forEach(tr => {
+                    let row = [];
+                    tr.querySelectorAll('td').forEach(td => {
+                        if(!td.classList.contains('hidden-col') && td.style.display !== 'none') {
+                            let colspan = parseInt(td.getAttribute('colspan')) || 1;
+                            row.push(td.innerText);
+                            for(let i=1; i<colspan; i++) row.push(""); 
+                        }
+                    });
+                    data.push(row);
+                });
+            }
+            return data;
+        }
+
+        function styleExcelSheet(ws, sheetType) {
+            const borderStyle = { top: { style: "thin", color: { rgb: "000000" } }, bottom: { style: "thin", color: { rgb: "000000" } }, left: { style: "thin", color: { rgb: "000000" } }, right: { style: "thin", color: { rgb: "000000" } } };
+            const range = XLSX.utils.decode_range(ws['!ref']);
+            for (let R = range.s.r; R <= range.e.r; ++R) {
+                for (let C = range.s.c; C <= range.e.c; ++C) {
+                    let cellRef = XLSX.utils.encode_cell({c: C, r: R});
+                    if (!ws[cellRef]) ws[cellRef] = { t: 's', v: '' };
+
+                    let font = { bold: false, color: {rgb: "000000"} };
+                    let fill = null;
+                    let border = borderStyle;
+
+                    if (sheetType === 'summary') {
+                        font.bold = true; // Make all summary text bold to match image
+                        if (R === 0) {
+                            if (C === 0) fill = { fgColor: { rgb: "FFC000" } }; // Yellow for Title
+                            else fill = { fgColor: { rgb: "FFFFFF" } };
+                        } else if (R >= 1 && R <= 6) {
+                            fill = { fgColor: { rgb: "D9EAD3" } }; // Light Mint Green
+                        } else if (R === 7) {
+                            fill = { fgColor: { rgb: "FFFFFF" } }; // Empty row 
+                            border = {}; // Remove border for empty row
+                        } else if (R === 8) {
+                            fill = { fgColor: { rgb: "3DA6F4" } }; // Light Blue
+                        } else if (R === 9) {
+                            fill = { fgColor: { rgb: "52ED52" } }; // Bright Lime Green
+                        } else if (R === 10) {
+                            fill = { fgColor: { rgb: "FF0000" } }; // Bright Red
+                        } else {
+                            fill = { fgColor: { rgb: "FFFFFF" } };
+                        }
+                    } else {
+                        // Standard styling for Prep & Loading Sheets
+                        if (R === 0) { 
+                            fill = { fgColor: { rgb: "FFC000" } }; // Yellow header
+                            font.bold = true;
+                        } else if (R === range.e.r) { 
+                            fill = { fgColor: { rgb: "00B0F0" } }; // Cyan total row
+                            font.bold = true;
+                        } else { 
+                            fill = { fgColor: { rgb: (R % 2 === 1) ? "BDD7EE" : "F8CBAD" } }; // Alternate rows
+                        }
+                    }
+
+                    ws[cellRef].s = { font: font, fill: fill, border: border, alignment: { horizontal: "center", vertical: "center" } };
+                }
+            }
+            
+            // Set Column Widths based on sheet type
+            let cols = []; 
+            if (sheetType === 'summary') {
+                cols = [{wch: 25}, {wch: 25}]; // Make summary columns wider
+            } else {
+                for (let i = range.s.c; i <= range.e.c; ++i) cols.push({wch: 15});
+            }
+            ws['!cols'] = cols;
+        }
+
+        function exportToExcel() {
+            if (typeof XLSX === 'undefined') { alert("Excel library is loading... Please wait."); return; }
+            toggleMenu(); 
+            let jobNo = document.getElementById('infoJobNo').value || "Untitled";
+
+            // 1. EXACT SUMMARY SHEET DATA (Matching Image)
+            let summaryData = [
+                ["CARGO LOG SUMMARY", ""], // Row 0
+                ["JOB NO", document.getElementById('infoJobNo').value], // Row 1
+                ["SHIPPER", document.getElementById('infoShipper').value], // Row 2
+                ["BUYER", document.getElementById('infoBuyer').value], // Row 3
+                ["QUALITY", document.getElementById('infoQuality').value], // Row 4
+                ["QUANTITY", document.getElementById('infoQuantity').value], // Row 5
+                ["PLACE", document.getElementById('infoPlace').value], // Row 6
+                ["", ""], // Row 7 (Empty separator)
+                ["Total Preparation", document.getElementById('sumTotalPrep').innerText], // Row 8
+                ["Total Loading", document.getElementById('sumTotalLoad').innerText], // Row 9
+                ["Cargo Balance", document.getElementById('sumCargoBalance').innerText] // Row 10
+            ];
+            let wsSummary = XLSX.utils.aoa_to_sheet(summaryData);
+            styleExcelSheet(wsSummary, 'summary');
+
+            // 2. PREPARATION SHEET
+            let prepData = getTableDataForExcel('prepTableMain');
+            let wsPrep = XLSX.utils.aoa_to_sheet(prepData);
+            styleExcelSheet(wsPrep, 'prep');
+
+            // 3. LOADING SHEET
+            let loadData = getTableDataForExcel('loadingTableMain');
+            let wsLoad = XLSX.utils.aoa_to_sheet(loadData);
+            styleExcelSheet(wsLoad, 'load');
+
+            let wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, wsSummary, "Summary");
+            XLSX.utils.book_append_sheet(wb, wsPrep, "Preparation");
+            XLSX.utils.book_append_sheet(wb, wsLoad, "Loading");
+
+            XLSX.writeFile(wb, "CargoLog_" + jobNo + ".xlsx");
         }
 
     </script>
