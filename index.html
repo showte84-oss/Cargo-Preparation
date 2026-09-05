@@ -161,7 +161,7 @@
         .tab-content.active { display: block; }
         
         .action-buttons-row { margin-top: 10px; display: flex; flex-wrap: wrap; gap: 8px; }
-        .btn-add { padding: 8px 12px; background-color: #34a853; color: white; border: none; cursor: border-box; border-radius: 4px; font-weight: bold; font-size: 12px; }
+        .btn-add { padding: 8px 12px; background-color: #34a853; color: white; border: none; cursor: pointer; border-radius: 4px; font-weight: bold; font-size: 12px; }
         .btn-add-col { background-color: #008CBA; }
         .btn-delete { padding: 8px 12px; background-color: #e74c3c; color: white; border: none; cursor: pointer; border-radius: 4px; font-weight: bold; font-size: 12px; }
         
@@ -828,7 +828,7 @@
         }
 
         // ==========================================
-        // 11. EXPORT TO EXCEL WITH EXACT STYLES (Summary Sheet Fix)
+        // 11. ENHANCED EXPORT TO EXCEL (Professional Styling & Values)
         // ==========================================
         function getTableDataForExcel(tableId) {
             let table = document.getElementById(tableId);
@@ -849,7 +849,15 @@
                 tr.querySelectorAll('td').forEach(td => {
                     if(!td.classList.contains('hidden-col') && td.style.display !== 'none') {
                         let input = td.querySelector('input, select');
-                        row.push(input ? input.value : td.innerText);
+                        let rawVal = input ? input.value : td.innerText;
+                        let trimmed = (rawVal !== undefined && rawVal !== null) ? rawVal.toString().trim() : "";
+                        
+                        // Parse as valid Number if numeric
+                        if (trimmed !== "" && !isNaN(trimmed)) {
+                            row.push(Number(trimmed));
+                        } else {
+                            row.push(trimmed);
+                        }
                     }
                 });
                 data.push(row);
@@ -863,7 +871,9 @@
                     tr.querySelectorAll('td').forEach(td => {
                         if(!td.classList.contains('hidden-col') && td.style.display !== 'none') {
                             let colspan = parseInt(td.getAttribute('colspan')) || 1;
-                            row.push(td.innerText);
+                            let rawVal = td.innerText.trim();
+                            let cellVal = (rawVal !== "" && !isNaN(rawVal)) ? Number(rawVal) : rawVal;
+                            row.push(cellVal);
                             for(let i=1; i<colspan; i++) row.push(""); 
                         }
                     });
@@ -874,77 +884,163 @@
         }
 
         function styleExcelSheet(ws, sheetType) {
-            const borderStyle = { top: { style: "thin", color: { rgb: "000000" } }, bottom: { style: "thin", color: { rgb: "000000" } }, left: { style: "thin", color: { rgb: "000000" } }, right: { style: "thin", color: { rgb: "000000" } } };
+            const thinBorder = { 
+                top: { style: "thin", color: { rgb: "555555" } }, 
+                bottom: { style: "thin", color: { rgb: "555555" } }, 
+                left: { style: "thin", color: { rgb: "555555" } }, 
+                right: { style: "thin", color: { rgb: "555555" } } 
+            };
+            const thickBottomBorder = { 
+                top: { style: "thin", color: { rgb: "000000" } }, 
+                bottom: { style: "double", color: { rgb: "000000" } }, 
+                left: { style: "thin", color: { rgb: "000000" } }, 
+                right: { style: "thin", color: { rgb: "000000" } } 
+            };
+
             const range = XLSX.utils.decode_range(ws['!ref']);
+            
             for (let R = range.s.r; R <= range.e.r; ++R) {
                 for (let C = range.s.c; C <= range.e.c; ++C) {
                     let cellRef = XLSX.utils.encode_cell({c: C, r: R});
                     if (!ws[cellRef]) ws[cellRef] = { t: 's', v: '' };
 
-                    let font = { bold: false, color: {rgb: "000000"} };
-                    let fill = null;
-                    let border = borderStyle;
+                    let font = { bold: false, color: { rgb: "000000" }, name: "Calibri", sz: 11 };
+                    let fill = { fgColor: { rgb: "FFFFFF" } };
+                    let border = thinBorder;
+                    let numFmt = undefined;
 
+                    // Numeric formatting
+                    if (typeof ws[cellRef].v === 'number') {
+                        numFmt = "#,##0";
+                    }
+
+                    // 1. SUMMARY SHEET STYLING
                     if (sheetType === 'summary') {
                         font.bold = true;
                         if (R === 0) {
-                            if (C === 0) fill = { fgColor: { rgb: "FFC000" } };
-                            else fill = { fgColor: { rgb: "FFFFFF" } };
+                            fill = { fgColor: { rgb: "1F4E78" } };
+                            font.color = { rgb: "FFFFFF" };
+                            font.sz = 14;
                         } else if (R >= 1 && R <= 6) {
-                            fill = { fgColor: { rgb: "D9EAD3" } };
+                            if (C === 0) {
+                                fill = { fgColor: { rgb: "D9E1F2" } }; // Light soft blue for headers
+                                font.color = { rgb: "1F4E78" };
+                            } else {
+                                fill = { fgColor: { rgb: "F2F2F2" } };
+                            }
                         } else if (R === 7) {
                             fill = { fgColor: { rgb: "FFFFFF" } };
                             border = {};
-                        } else if (R === 8) {
-                            fill = { fgColor: { rgb: "3DA6F4" } };
-                        } else if (R === 9) {
-                            fill = { fgColor: { rgb: "52ED52" } };
-                        } else if (R === 10) {
-                            fill = { fgColor: { rgb: "FF0000" } };
-                        } else {
-                            fill = { fgColor: { rgb: "FFFFFF" } };
+                        } else if (R === 8) { // Total Prep
+                            fill = { fgColor: { rgb: "D9E1F2" } };
+                            font.color = { rgb: "000000" };
+                            font.sz = 12;
+                        } else if (R === 9) { // Total Load
+                            fill = { fgColor: { rgb: "FCE4D6" } };
+                            font.color = { rgb: "C00000" };
+                            font.sz = 12;
+                        } else if (R === 10) { // Cargo Balance
+                            fill = { fgColor: { rgb: "E2EFDA" } };
+                            font.color = { rgb: "375623" };
+                            font.sz = 12;
                         }
-                    } else {
-                        // Standard styling for Prep & Loading Sheets
-                        if (R === 0) { 
-                            if (sheetType === 'prep' && C === 6) {
-                                fill = { fgColor: { rgb: "E74C3C" } };
+                    } 
+                    // 2. PREPARATION SHEET STYLING
+                    else if (sheetType === 'prep') {
+                        if (R === 0) {
+                            // Header Row
+                            font.bold = true;
+                            font.sz = 11;
+                            if (C === 6) { 
+                                fill = { fgColor: { rgb: "E74C3C" } }; // Output Header Red
+                                font.color = { rgb: "FFFFFF" };
+                            } else if (C === 7) { 
+                                fill = { fgColor: { rgb: "00B050" } }; // Balance Header Green
                                 font.color = { rgb: "FFFFFF" };
                             } else {
-                                fill = { fgColor: { rgb: "FFC000" } };
+                                fill = { fgColor: { rgb: "FFC000" } }; // Yellow Headers
+                                font.color = { rgb: "000000" };
                             }
+                        } else if (R === range.e.r) {
+                            // TOTAL ROW
                             font.bold = true;
-                        } else if (R === range.e.r) { 
+                            font.sz = 12;
+                            border = thickBottomBorder;
                             fill = { fgColor: { rgb: "00B0F0" } };
-                            font.bold = true;
-                            font.sz = 13;
-                            
-                            // Excel Export Specific Colors for Total Cells
-                            if (sheetType === 'prep') {
-                                if (C === 5) font.color = { rgb: "000000" }; // Grand Total Black
-                                else if (C === 6) { fill = { fgColor: { rgb: "FFE6E6" } }; font.color = { rgb: "D63031" }; } // Output Red
-                                else if (C === 7) { fill = { fgColor: { rgb: "E8F8F0" } }; font.color = { rgb: "00B050" }; } // Balance Green
+                            font.color = { rgb: "FFFFFF" };
+
+                            if (C <= 3) {
+                                font.color = { rgb: "000000" };
+                            } else if (C === 4 || C === 5) { // Grand Total
+                                font.color = { rgb: "000000" };
+                            } else if (C === 6) { // Output Total
+                                fill = { fgColor: { rgb: "FFE6E6" } };
+                                font.color = { rgb: "D63031" };
+                            } else if (C === 7) { // Final Balance
+                                fill = { fgColor: { rgb: "E8F8F0" } };
+                                font.color = { rgb: "00B050" };
                             }
-                        } else { 
-                            fill = { fgColor: { rgb: (R % 2 === 1) ? "BDD7EE" : "F8CBAD" } };
-                            if (sheetType === 'prep' && C === 6) {
+                        } else {
+                            // Data Rows
+                            fill = { fgColor: { rgb: (R % 2 === 1) ? "FFFFFF" : "F9F9F9" } };
+                            if (C === 1) fill = { fgColor: { rgb: "E2EFDA" } }; // Date column light tint
+                            if (C === 6) {
+                                fill = { fgColor: { rgb: "FFF0F0" } }; // Output column soft red
                                 font.color = { rgb: "D63031" };
                                 font.bold = true;
                             }
+                            if (C === 7) {
+                                font.color = { rgb: "00B050" };
+                                font.bold = true;
+                            }
+                        }
+                    } 
+                    // 3. LOADING SHEET STYLING
+                    else if (sheetType === 'load') {
+                        if (R === 0) {
+                            font.bold = true;
+                            font.sz = 11;
+                            fill = { fgColor: { rgb: "FFC000" } }; // Yellow Header
+                            font.color = { rgb: "000000" };
+                        } else if (R === range.e.r) {
+                            // TOTAL ROW
+                            font.bold = true;
+                            font.sz = 12;
+                            border = thickBottomBorder;
+                            fill = { fgColor: { rgb: "00B0F0" } };
+                            font.color = { rgb: "FFFFFF" };
+                        } else {
+                            // Data Rows
+                            fill = { fgColor: { rgb: (R % 2 === 1) ? "FFFFFF" : "F9F9F9" } };
+                            if (C === 1) fill = { fgColor: { rgb: "E2EFDA" } }; // Date column tint
                         }
                     }
 
-                    ws[cellRef].s = { font: font, fill: fill, border: border, alignment: { horizontal: "center", vertical: "center" } };
+                    ws[cellRef].s = { 
+                        font: font, 
+                        fill: fill, 
+                        border: border, 
+                        alignment: { 
+                            horizontal: (sheetType === 'summary' && C === 0) ? "left" : "center", 
+                            vertical: "center" 
+                        },
+                        numFmt: numFmt
+                    };
                 }
             }
-            
-            let cols = []; 
+
+            // Auto column width configuration
+            let colWidths = [];
             if (sheetType === 'summary') {
-                cols = [{wch: 25}, {wch: 25}];
+                colWidths = [{ wch: 22 }, { wch: 25 }];
             } else {
-                for (let i = range.s.c; i <= range.e.c; ++i) cols.push({wch: 15});
+                for (let C = range.s.c; C <= range.e.c; ++C) {
+                    if (C === 0) colWidths.push({ wch: 6 }); // Sr/No
+                    else if (C === 1) colWidths.push({ wch: 13 }); // Date
+                    else colWidths.push({ wch: 14 }); // Number/Text cols
+                }
             }
-            ws['!cols'] = cols;
+            ws['!cols'] = colWidths;
         }
 
         function exportToExcel() {
@@ -952,19 +1048,23 @@
             toggleMenu(); 
             let jobNo = document.getElementById('infoJobNo').value || "Untitled";
 
-            // 1. EXACT SUMMARY SHEET DATA (Matching Image)
+            // 1. EXACT SUMMARY SHEET DATA (Numeric parsed)
+            let rawPrep = parseFloat(document.getElementById('sumTotalPrep').innerText) || 0;
+            let rawLoad = parseFloat(document.getElementById('sumTotalLoad').innerText) || 0;
+            let rawBal = parseFloat(document.getElementById('sumCargoBalance').innerText) || 0;
+
             let summaryData = [
                 ["CARGO LOG SUMMARY", ""],
-                ["JOB NO", document.getElementById('infoJobNo').value],
-                ["SHIPPER", document.getElementById('infoShipper').value],
-                ["BUYER", document.getElementById('infoBuyer').value],
-                ["QUALITY", document.getElementById('infoQuality').value],
-                ["QUANTITY", document.getElementById('infoQuantity').value],
-                ["PLACE", document.getElementById('infoPlace').value],
+                ["JOB NO", document.getElementById('infoJobNo').value || ""],
+                ["SHIPPER", document.getElementById('infoShipper').value || ""],
+                ["BUYER", document.getElementById('infoBuyer').value || ""],
+                ["QUALITY", document.getElementById('infoQuality').value || ""],
+                ["QUANTITY", document.getElementById('infoQuantity').value || ""],
+                ["PLACE", document.getElementById('infoPlace').value || ""],
                 ["", ""],
-                ["Total Preparation", document.getElementById('sumTotalPrep').innerText],
-                ["Total Loading", document.getElementById('sumTotalLoad').innerText],
-                ["Cargo Balance", document.getElementById('sumCargoBalance').innerText]
+                ["Total Preparation", rawPrep],
+                ["Total Loading", rawLoad],
+                ["Cargo Balance", rawBal]
             ];
             let wsSummary = XLSX.utils.aoa_to_sheet(summaryData);
             styleExcelSheet(wsSummary, 'summary');
@@ -984,7 +1084,9 @@
             XLSX.utils.book_append_sheet(wb, wsPrep, "Preparation");
             XLSX.utils.book_append_sheet(wb, wsLoad, "Loading");
 
-            XLSX.writeFile(wb, "CargoLog_" + jobNo + ".xlsx");
+            // Format Filename cleanly with safe timestamp
+            let safeDate = new Date().toISOString().slice(0, 10);
+            XLSX.writeFile(wb, `CargoLog_${jobNo}_${safeDate}.xlsx`);
         }
 
     </script>
