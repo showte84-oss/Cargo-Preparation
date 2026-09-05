@@ -105,7 +105,7 @@
         .data-section { background: white; padding: 5px; margin: 0 5px 5px 5px; overflow-x: auto; border: 1px solid #ccc; border-top: 3px solid #0b57d0; border-radius: 0 0 6px 6px; flex-grow: 1; position: relative; }
         
         .data-table { border-collapse: collapse; width: 100%; min-width: 600px; text-align: center; table-layout: fixed; }
-        .data-table th, .data-table td { border: 1px solid #555; padding: 0; height: 32px; vertical-align: middle; box-sizing: border-box; }
+        .data-table th, .data-table td { border: 1px solid #555; padding: 0; height: 34px; vertical-align: middle; box-sizing: border-box; }
         .data-table th { padding: 4px; font-size: 12px; position: relative; }
         .data-table input, .data-table select { width: 100%; height: 100%; box-sizing: border-box; border: none; text-align: center; font-size: 13px; padding: 4px; background: transparent; outline: none; }
         .data-table input:focus, .data-table select:focus { background-color: rgba(0, 123, 255, 0.1); }
@@ -124,11 +124,36 @@
         .resizer:hover, .resizer.resizing { background-color: rgba(231, 76, 60, 0.8); }
 
         .prep-th { background-color: #FFC000; color: black; font-weight: bold; }
-        .output-col { color: red; font-weight: bold; }
+        
+        /* OUTPUT COLUMN & BALANCE STYLING */
+        .output-header-col { background-color: #e74c3c !important; color: white !important; font-weight: bold; }
+        .output-col { color: #d63031 !important; font-weight: bold !important; }
+        .output-cell-bg { background-color: #fff0f0; }
         .balance-col { background-color: #00b050; color: white; font-weight: bold; }
         .load-th { background-color: #FFC000; color: black; font-weight: bold; }
-        .load-total-row { background-color: #00B0F0; color: white; font-weight: bold; font-size: 12px; }
-        .load-green-col { background-color: #00B0F0; color: black; font-weight: bold; }
+
+        /* HIGHLIGHTED TOTAL ROWS & SPECIFIC TOTAL COLORS */
+        .load-total-row { 
+            background-color: #00B0F0; 
+            color: white; 
+            font-weight: 900; 
+            font-size: 16px; 
+            letter-spacing: 0.5px;
+        }
+        .load-total-row td { 
+            height: 38px;
+            font-size: 16px; 
+            font-weight: 900;
+        }
+        
+        /* Preparation Specific Total Cells */
+        .prep-total-label { text-align: right; padding-right: 10px; color: #000000 !important; font-weight: 900 !important; font-size: 16px !important; }
+        .prep-total-dn { color: #000000 !important; font-weight: 900 !important; font-size: 16px !important; }
+        .prep-total-grand { color: #000000 !important; font-weight: 900 !important; font-size: 16px !important; }
+        .prep-total-output { color: #d63031 !important; font-weight: 900 !important; font-size: 16px !important; background-color: #ffe6e6 !important; }
+        .prep-total-balance { color: #00b050 !important; font-weight: 900 !important; font-size: 16px !important; background-color: #e8f8f0 !important; }
+
+        .load-green-col { background-color: #00B0F0; color: white; font-weight: 900; font-size: 16px; }
 
         .notes-section { margin-top: 10px; }
         .notes-section textarea { width: 100%; height: 80px; padding: 8px; border: 1px solid #ccc; box-sizing: border-box; font-size: 13px; font-family: inherit; }
@@ -136,7 +161,7 @@
         .tab-content.active { display: block; }
         
         .action-buttons-row { margin-top: 10px; display: flex; flex-wrap: wrap; gap: 8px; }
-        .btn-add { padding: 8px 12px; background-color: #34a853; color: white; border: none; cursor: pointer; border-radius: 4px; font-weight: bold; font-size: 12px; }
+        .btn-add { padding: 8px 12px; background-color: #34a853; color: white; border: none; cursor: border-box; border-radius: 4px; font-weight: bold; font-size: 12px; }
         .btn-add-col { background-color: #008CBA; }
         .btn-delete { padding: 8px 12px; background-color: #e74c3c; color: white; border: none; cursor: pointer; border-radius: 4px; font-weight: bold; font-size: 12px; }
         
@@ -277,15 +302,17 @@
                 <thead>
                     <tr>
                         <th class="col-no prep-th">No</th><th class="col-date prep-th">Date</th><th class="col-num prep-th">Day</th><th class="col-num prep-th">Night</th>
-                        <th class="col-num prep-th">D/N Total</th><th class="col-num prep-th">Grand Total</th><th class="col-num output-col" style="color: white; background-color: #FFC000;">Output</th><th class="col-num balance-col" style="background-color: #FFC000; color: black;">Balance</th>
+                        <th class="col-num prep-th">D/N Total</th><th class="col-num prep-th">Grand Total</th><th class="col-num output-header-col">Output</th><th class="col-num balance-col" style="background-color: #00b050; color: white;">Balance</th>
                     </tr>
                 </thead>
                 <tbody id="prepTableBody"></tbody>
                 <tfoot>
                     <tr class="load-total-row">
-                        <td colspan="4" style="text-align: right; padding-right: 10px;">Total</td>
-                        <td id="prepTotalDN">0</td><td id="prepGrandTotal">0</td>
-                        <td id="prepTotalOutput" class="output-col" style="color: white;">0</td><td id="prepFinalBalance" class="balance-col">0</td>
+                        <td colspan="4" class="prep-total-label">Total</td>
+                        <td id="prepTotalDN" class="prep-total-dn">0</td>
+                        <td id="prepGrandTotal" class="prep-total-grand">0</td>
+                        <td id="prepTotalOutput" class="prep-total-output">0</td>
+                        <td id="prepFinalBalance" class="prep-total-balance">0</td>
                     </tr>
                 </tfoot>
             </table>
@@ -310,7 +337,7 @@
                 <tbody id="loadTableBody"></tbody>
                 <tfoot id="loadTfoot">
                     <tr class="load-total-row">
-                        <td colspan="3" style="text-align: right; padding-right: 10px;">Total</td>
+                        <td colspan="3" style="text-align: right; padding-right: 10px; color: #ffffff;">Total</td>
                         <td class="std-col-truck"></td><td id="loadTotalJumbo" class="load-green-col std-col-jumbo">0</td><td id="loadTotalBags" class="load-green-col std-col-bags">0</td><td class="std-col-remark"></td>
                     </tr>
                 </tfoot>
@@ -328,7 +355,7 @@
             <h2>Summary Data</h2>
             <p>Job No: <span id="summaryJobNo" style="font-weight:bold;"></span></p>
             <ul style="font-size: 16px; line-height: 1.8;">
-                <li>Total Preparation: <span id="sumTotalPrep" style="font-weight:bold; color: #0070c0;">0</span></li>
+                <li>Total Preparation: <span id="sumTotalPrep" style="font-weight:bold; color: #000000;">0</span></li>
                 <li>Total Loading: <span id="sumTotalLoad" style="font-weight:bold; color: red;">0</span></li>
                 <li>Cargo Balance: <span id="sumCargoBalance" style="font-weight:bold; color: green;">0</span></li>
             </ul>
@@ -585,15 +612,36 @@
         function handleDateFocus(el) { if(!isAdmin) return; let val = el.value; if(val && val.includes('/')) { let parts = val.split('/'); if(parts.length === 3) { el.type = 'date'; el.value = `${parts[2]}-${parts[1]}-${parts[0]}`; } } else { el.type = 'date'; } try { el.showPicker(); } catch(e) {} }
         function handleDateBlur(el) { if(!isAdmin) return; let val = el.value; if (val && val.includes('-')) { let parts = val.split('-'); if(parts.length === 3) { el.type = 'text'; el.value = `${parts[2]}/${parts[1]}/${parts[0]}`; } } else { el.type = 'text'; } syncOutputFromLoading(); }
 
-        function addPrepRow(data = { date: "", day: "", night: "", output: "" }) { prepRowCount++; const tbody = document.getElementById('prepTableBody'); const tr = document.createElement('tr'); tr.innerHTML = `<td style="background-color: #f9f9f9;">${prepRowCount}</td><td style="background-color: #b7e1cd;"><input type="text" class="p-date" value="${data.date}" onfocus="handleDateFocus(this)" onblur="handleDateBlur(this)"></td><td><input type="number" class="p-day" value="${data.day}" onkeyup="calcPrep()" onchange="calcPrep()"></td><td><input type="number" class="p-night" value="${data.night}" onkeyup="calcPrep()" onchange="calcPrep()"></td><td class="p-dn" style="background-color: #f9f9f9;">0</td><td class="p-grand" style="background-color: #f9f9f9;">0</td><td><input type="number" class="p-output output-col" value="${data.output}" onkeyup="calcPrep()" onchange="calcPrep()"></td><td class="p-balance" style="font-weight:bold; color:#00b050; background-color: #f0fdf4;">0</td>`; tbody.appendChild(tr); calcPrep(); }
+        function addPrepRow(data = { date: "", day: "", night: "", output: "" }) { 
+            prepRowCount++; 
+            const tbody = document.getElementById('prepTableBody'); 
+            const tr = document.createElement('tr'); 
+            tr.innerHTML = `
+                <td style="background-color: #f9f9f9;">${prepRowCount}</td>
+                <td style="background-color: #b7e1cd;"><input type="text" class="p-date" value="${data.date}" onfocus="handleDateFocus(this)" onblur="handleDateBlur(this)"></td>
+                <td><input type="number" class="p-day" value="${data.day}" onkeyup="calcPrep()" onchange="calcPrep()"></td>
+                <td><input type="number" class="p-night" value="${data.night}" onkeyup="calcPrep()" onchange="calcPrep()"></td>
+                <td class="p-dn" style="background-color: #f9f9f9;">0</td>
+                <td class="p-grand" style="background-color: #f9f9f9;">0</td>
+                <td class="output-cell-bg"><input type="number" class="p-output output-col" value="${data.output}" onkeyup="calcPrep()" onchange="calcPrep()"></td>
+                <td class="p-balance" style="font-weight:bold; color:#00b050; background-color: #f0fdf4;">0</td>`; 
+            tbody.appendChild(tr); 
+            calcPrep(); 
+        }
         function deletePrepRow() { const tbody = document.getElementById('prepTableBody'); if (tbody.children.length > 0) { tbody.removeChild(tbody.lastElementChild); prepRowCount--; calcPrep(); hasUnsavedChanges = true; } }
+        
         function calcPrep() {
-            const rows = document.getElementById('prepTableBody').getElementsByTagName('tr'); let grandTotal = 0, sumOutput = 0;
+            const rows = document.getElementById('prepTableBody').getElementsByTagName('tr'); let grandTotal = 0, sumOutput = 0, sumDN = 0;
             for (let i = 0; i < rows.length; i++) {
                 let day = parseFloat(rows[i].querySelector('.p-day').value) || 0; let night = parseFloat(rows[i].querySelector('.p-night').value) || 0; let output = parseFloat(rows[i].querySelector('.p-output').value) || 0; let dnTotal = day + night;
+                sumDN += dnTotal;
                 rows[i].querySelector('.p-dn').innerText = dnTotal > 0 ? dnTotal : ""; grandTotal += dnTotal; rows[i].querySelector('.p-grand').innerText = grandTotal > 0 ? grandTotal : ""; sumOutput += output; rows[i].querySelector('.p-balance').innerText = grandTotal - sumOutput;
             }
-            document.getElementById('prepGrandTotal').innerText = grandTotal; document.getElementById('prepTotalOutput').innerText = sumOutput; document.getElementById('prepFinalBalance').innerText = grandTotal - sumOutput; updateSummary();
+            document.getElementById('prepTotalDN').innerText = sumDN;
+            document.getElementById('prepGrandTotal').innerText = grandTotal; 
+            document.getElementById('prepTotalOutput').innerText = sumOutput; 
+            document.getElementById('prepFinalBalance').innerText = grandTotal - sumOutput; 
+            updateSummary();
         }
 
         function editStdCol(spanId) { const span = document.getElementById(spanId); if (span) { const newName = prompt("Edit column name:", span.innerText); if (newName) { span.innerText = newName; if(spanId === 'truckColName') stdColsState.truck.name = newName; if(spanId === 'jumboColName') stdColsState.jumbo.name = newName; if(spanId === 'bagsColName') stdColsState.bags.name = newName; hasUnsavedChanges = true; updateSummary(); } } }
@@ -606,7 +654,7 @@
             const prepRows = document.getElementById('prepTableBody').getElementsByTagName('tr');
             for (let i = 0; i < prepRows.length; i++) {
                 let d = prepRows[i].querySelector('.p-date').value.trim(); let outInput = prepRows[i].querySelector('.p-output');
-                if (d && loadSums.hasOwnProperty(d)) { outInput.value = loadSums[d] > 0 ? loadSums[d] : ""; outInput.setAttribute('readonly', 'true'); outInput.style.backgroundColor = '#ffe6e6'; } else { outInput.removeAttribute('readonly'); outInput.style.backgroundColor = 'transparent'; }
+                if (d && loadSums.hasOwnProperty(d)) { outInput.value = loadSums[d] > 0 ? loadSums[d] : ""; outInput.setAttribute('readonly', 'true'); outInput.style.backgroundColor = '#ffd2d2'; } else { outInput.removeAttribute('readonly'); outInput.style.backgroundColor = 'transparent'; }
             } calcPrep(); 
         }
 
@@ -631,7 +679,7 @@
             th.innerHTML = `<div style="display:flex; justify-content:space-between; align-items:center; padding: 0 2px;"><span class="col-name-span">${colName}</span><div class="col-action-btns"><button class="icon-btn" onclick="editDynCol('${colId}')">✎</button><button class="icon-btn icon-btn-del" onclick="deleteDynCol('${colId}')">✖</button></div></div>`;
             theadRow.insertBefore(th, theadRow.querySelector('.std-col-remark'));
             document.querySelectorAll('#loadTableBody tr').forEach(row => { const td = document.createElement('td'); td.className = 'dyn-col ' + colId; td.innerHTML = `<input type="text" class="l-dyn-input" data-colid="${colId}">`; row.insertBefore(td, row.querySelector('.std-col-remark')); });
-            const tfootRow = document.querySelector('#Loading tfoot tr'); const tdFoot = document.createElement('td'); tdFoot.className = 'dyn-col ' + colId; tdFoot.style.backgroundColor = "lime"; tfootRow.insertBefore(tdFoot, tfootRow.querySelector('.std-col-remark'));
+            const tfootRow = document.querySelector('#Loading tfoot tr'); const tdFoot = document.createElement('td'); tdFoot.className = 'dyn-col ' + colId; tdFoot.style.backgroundColor = "#00B0F0"; tdFoot.style.color = "white"; tdFoot.style.fontWeight = "900"; tdFoot.style.fontSize = "16px"; tfootRow.insertBefore(tdFoot, tfootRow.querySelector('.std-col-remark'));
             hasUnsavedChanges = true; initResizableColumns(); 
         }
         function editDynCol(colId) { const th = document.querySelector(`th.${colId} .col-name-span`); if (th) { const newName = prompt("Edit column name:", th.innerText); if (newName) { th.innerText = newName; hasUnsavedChanges = true; } } }
@@ -838,34 +886,51 @@
                     let border = borderStyle;
 
                     if (sheetType === 'summary') {
-                        font.bold = true; // Make all summary text bold to match image
+                        font.bold = true;
                         if (R === 0) {
-                            if (C === 0) fill = { fgColor: { rgb: "FFC000" } }; // Yellow for Title
+                            if (C === 0) fill = { fgColor: { rgb: "FFC000" } };
                             else fill = { fgColor: { rgb: "FFFFFF" } };
                         } else if (R >= 1 && R <= 6) {
-                            fill = { fgColor: { rgb: "D9EAD3" } }; // Light Mint Green
+                            fill = { fgColor: { rgb: "D9EAD3" } };
                         } else if (R === 7) {
-                            fill = { fgColor: { rgb: "FFFFFF" } }; // Empty row 
-                            border = {}; // Remove border for empty row
+                            fill = { fgColor: { rgb: "FFFFFF" } };
+                            border = {};
                         } else if (R === 8) {
-                            fill = { fgColor: { rgb: "3DA6F4" } }; // Light Blue
+                            fill = { fgColor: { rgb: "3DA6F4" } };
                         } else if (R === 9) {
-                            fill = { fgColor: { rgb: "52ED52" } }; // Bright Lime Green
+                            fill = { fgColor: { rgb: "52ED52" } };
                         } else if (R === 10) {
-                            fill = { fgColor: { rgb: "FF0000" } }; // Bright Red
+                            fill = { fgColor: { rgb: "FF0000" } };
                         } else {
                             fill = { fgColor: { rgb: "FFFFFF" } };
                         }
                     } else {
                         // Standard styling for Prep & Loading Sheets
                         if (R === 0) { 
-                            fill = { fgColor: { rgb: "FFC000" } }; // Yellow header
+                            if (sheetType === 'prep' && C === 6) {
+                                fill = { fgColor: { rgb: "E74C3C" } };
+                                font.color = { rgb: "FFFFFF" };
+                            } else {
+                                fill = { fgColor: { rgb: "FFC000" } };
+                            }
                             font.bold = true;
                         } else if (R === range.e.r) { 
-                            fill = { fgColor: { rgb: "00B0F0" } }; // Cyan total row
+                            fill = { fgColor: { rgb: "00B0F0" } };
                             font.bold = true;
+                            font.sz = 13;
+                            
+                            // Excel Export Specific Colors for Total Cells
+                            if (sheetType === 'prep') {
+                                if (C === 5) font.color = { rgb: "000000" }; // Grand Total Black
+                                else if (C === 6) { fill = { fgColor: { rgb: "FFE6E6" } }; font.color = { rgb: "D63031" }; } // Output Red
+                                else if (C === 7) { fill = { fgColor: { rgb: "E8F8F0" } }; font.color = { rgb: "00B050" }; } // Balance Green
+                            }
                         } else { 
-                            fill = { fgColor: { rgb: (R % 2 === 1) ? "BDD7EE" : "F8CBAD" } }; // Alternate rows
+                            fill = { fgColor: { rgb: (R % 2 === 1) ? "BDD7EE" : "F8CBAD" } };
+                            if (sheetType === 'prep' && C === 6) {
+                                font.color = { rgb: "D63031" };
+                                font.bold = true;
+                            }
                         }
                     }
 
@@ -873,10 +938,9 @@
                 }
             }
             
-            // Set Column Widths based on sheet type
             let cols = []; 
             if (sheetType === 'summary') {
-                cols = [{wch: 25}, {wch: 25}]; // Make summary columns wider
+                cols = [{wch: 25}, {wch: 25}];
             } else {
                 for (let i = range.s.c; i <= range.e.c; ++i) cols.push({wch: 15});
             }
@@ -890,17 +954,17 @@
 
             // 1. EXACT SUMMARY SHEET DATA (Matching Image)
             let summaryData = [
-                ["CARGO LOG SUMMARY", ""], // Row 0
-                ["JOB NO", document.getElementById('infoJobNo').value], // Row 1
-                ["SHIPPER", document.getElementById('infoShipper').value], // Row 2
-                ["BUYER", document.getElementById('infoBuyer').value], // Row 3
-                ["QUALITY", document.getElementById('infoQuality').value], // Row 4
-                ["QUANTITY", document.getElementById('infoQuantity').value], // Row 5
-                ["PLACE", document.getElementById('infoPlace').value], // Row 6
-                ["", ""], // Row 7 (Empty separator)
-                ["Total Preparation", document.getElementById('sumTotalPrep').innerText], // Row 8
-                ["Total Loading", document.getElementById('sumTotalLoad').innerText], // Row 9
-                ["Cargo Balance", document.getElementById('sumCargoBalance').innerText] // Row 10
+                ["CARGO LOG SUMMARY", ""],
+                ["JOB NO", document.getElementById('infoJobNo').value],
+                ["SHIPPER", document.getElementById('infoShipper').value],
+                ["BUYER", document.getElementById('infoBuyer').value],
+                ["QUALITY", document.getElementById('infoQuality').value],
+                ["QUANTITY", document.getElementById('infoQuantity').value],
+                ["PLACE", document.getElementById('infoPlace').value],
+                ["", ""],
+                ["Total Preparation", document.getElementById('sumTotalPrep').innerText],
+                ["Total Loading", document.getElementById('sumTotalLoad').innerText],
+                ["Cargo Balance", document.getElementById('sumCargoBalance').innerText]
             ];
             let wsSummary = XLSX.utils.aoa_to_sheet(summaryData);
             styleExcelSheet(wsSummary, 'summary');
