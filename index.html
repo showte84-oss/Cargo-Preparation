@@ -146,7 +146,6 @@
             font-weight: 900;
         }
         
-        /* Preparation Specific Total Cells */
         .prep-total-label { text-align: right; padding-right: 10px; color: #000000 !important; font-weight: 900 !important; font-size: 16px !important; }
         .prep-total-dn { color: #000000 !important; font-weight: 900 !important; font-size: 16px !important; }
         .prep-total-grand { color: #000000 !important; font-weight: 900 !important; font-size: 16px !important; }
@@ -372,7 +371,6 @@
         let isEditMode = false; let currentMarkingBase64 = ""; 
         let stdColsState = { truck: { exists: true, name: "Truck No" }, jumbo: { exists: true, name: "Jumbo" }, bags: { exists: true, name: "50 Kgs Bags" } };
         let pressTimer;
-        
         let hasUnsavedChanges = false;
 
         document.addEventListener('input', function() { if(isAdmin) hasUnsavedChanges = true; });
@@ -390,10 +388,8 @@
         function toggleZoomMenu() {
             const actions = document.getElementById('zoomActions');
             const mainBtn = document.getElementById('zoomMainBtn');
-            
             actions.classList.toggle('show');
             mainBtn.classList.toggle('active');
-            
             if (actions.classList.contains('show')) {
                 startZoomTimer();
             } else {
@@ -412,10 +408,8 @@
         function zoomUI(step) {
             if(step === 0) { currentZoom = 1.0; } 
             else { currentZoom += step; }
-            
             if(currentZoom < 0.5) currentZoom = 0.5;
             if(currentZoom > 2.5) currentZoom = 2.5;
-            
             document.querySelectorAll('.data-table').forEach(el => {
                 el.style.zoom = currentZoom;
                 el.style.transformOrigin = "top left";
@@ -828,7 +822,7 @@
         }
 
         // ==========================================
-        // 11. ENHANCED EXPORT TO EXCEL (Professional Styling & Values)
+        // 11. ENHANCED EXPORT TO EXCEL (With Explicit .xlsx & Clean Binary Download)
         // ==========================================
         function getTableDataForExcel(tableId) {
             let table = document.getElementById(tableId);
@@ -852,7 +846,6 @@
                         let rawVal = input ? input.value : td.innerText;
                         let trimmed = (rawVal !== undefined && rawVal !== null) ? rawVal.toString().trim() : "";
                         
-                        // Parse as valid Number if numeric
                         if (trimmed !== "" && !isNaN(trimmed)) {
                             row.push(Number(trimmed));
                         } else {
@@ -909,12 +902,10 @@
                     let border = thinBorder;
                     let numFmt = undefined;
 
-                    // Numeric formatting
                     if (typeof ws[cellRef].v === 'number') {
                         numFmt = "#,##0";
                     }
 
-                    // 1. SUMMARY SHEET STYLING
                     if (sheetType === 'summary') {
                         font.bold = true;
                         if (R === 0) {
@@ -923,7 +914,7 @@
                             font.sz = 14;
                         } else if (R >= 1 && R <= 6) {
                             if (C === 0) {
-                                fill = { fgColor: { rgb: "D9E1F2" } }; // Light soft blue for headers
+                                fill = { fgColor: { rgb: "D9E1F2" } };
                                 font.color = { rgb: "1F4E78" };
                             } else {
                                 fill = { fgColor: { rgb: "F2F2F2" } };
@@ -931,38 +922,35 @@
                         } else if (R === 7) {
                             fill = { fgColor: { rgb: "FFFFFF" } };
                             border = {};
-                        } else if (R === 8) { // Total Prep
+                        } else if (R === 8) {
                             fill = { fgColor: { rgb: "D9E1F2" } };
                             font.color = { rgb: "000000" };
                             font.sz = 12;
-                        } else if (R === 9) { // Total Load
+                        } else if (R === 9) {
                             fill = { fgColor: { rgb: "FCE4D6" } };
                             font.color = { rgb: "C00000" };
                             font.sz = 12;
-                        } else if (R === 10) { // Cargo Balance
+                        } else if (R === 10) {
                             fill = { fgColor: { rgb: "E2EFDA" } };
                             font.color = { rgb: "375623" };
                             font.sz = 12;
                         }
                     } 
-                    // 2. PREPARATION SHEET STYLING
                     else if (sheetType === 'prep') {
                         if (R === 0) {
-                            // Header Row
                             font.bold = true;
                             font.sz = 11;
                             if (C === 6) { 
-                                fill = { fgColor: { rgb: "E74C3C" } }; // Output Header Red
+                                fill = { fgColor: { rgb: "E74C3C" } };
                                 font.color = { rgb: "FFFFFF" };
                             } else if (C === 7) { 
-                                fill = { fgColor: { rgb: "00B050" } }; // Balance Header Green
+                                fill = { fgColor: { rgb: "00B0F0" } };
                                 font.color = { rgb: "FFFFFF" };
                             } else {
-                                fill = { fgColor: { rgb: "FFC000" } }; // Yellow Headers
+                                fill = { fgColor: { rgb: "FFC000" } };
                                 font.color = { rgb: "000000" };
                             }
                         } else if (R === range.e.r) {
-                            // TOTAL ROW
                             font.bold = true;
                             font.sz = 12;
                             border = thickBottomBorder;
@@ -971,21 +959,20 @@
 
                             if (C <= 3) {
                                 font.color = { rgb: "000000" };
-                            } else if (C === 4 || C === 5) { // Grand Total
+                            } else if (C === 4 || C === 5) {
                                 font.color = { rgb: "000000" };
-                            } else if (C === 6) { // Output Total
+                            } else if (C === 6) {
                                 fill = { fgColor: { rgb: "FFE6E6" } };
                                 font.color = { rgb: "D63031" };
-                            } else if (C === 7) { // Final Balance
+                            } else if (C === 7) {
                                 fill = { fgColor: { rgb: "E8F8F0" } };
                                 font.color = { rgb: "00B050" };
                             }
                         } else {
-                            // Data Rows
                             fill = { fgColor: { rgb: (R % 2 === 1) ? "FFFFFF" : "F9F9F9" } };
-                            if (C === 1) fill = { fgColor: { rgb: "E2EFDA" } }; // Date column light tint
+                            if (C === 1) fill = { fgColor: { rgb: "E2EFDA" } };
                             if (C === 6) {
-                                fill = { fgColor: { rgb: "FFF0F0" } }; // Output column soft red
+                                fill = { fgColor: { rgb: "FFF0F0" } };
                                 font.color = { rgb: "D63031" };
                                 font.bold = true;
                             }
@@ -995,24 +982,21 @@
                             }
                         }
                     } 
-                    // 3. LOADING SHEET STYLING
                     else if (sheetType === 'load') {
                         if (R === 0) {
                             font.bold = true;
                             font.sz = 11;
-                            fill = { fgColor: { rgb: "FFC000" } }; // Yellow Header
+                            fill = { fgColor: { rgb: "FFC000" } };
                             font.color = { rgb: "000000" };
                         } else if (R === range.e.r) {
-                            // TOTAL ROW
                             font.bold = true;
                             font.sz = 12;
                             border = thickBottomBorder;
                             fill = { fgColor: { rgb: "00B0F0" } };
                             font.color = { rgb: "FFFFFF" };
                         } else {
-                            // Data Rows
                             fill = { fgColor: { rgb: (R % 2 === 1) ? "FFFFFF" : "F9F9F9" } };
-                            if (C === 1) fill = { fgColor: { rgb: "E2EFDA" } }; // Date column tint
+                            if (C === 1) fill = { fgColor: { rgb: "E2EFDA" } };
                         }
                     }
 
@@ -1029,26 +1013,29 @@
                 }
             }
 
-            // Auto column width configuration
             let colWidths = [];
             if (sheetType === 'summary') {
                 colWidths = [{ wch: 22 }, { wch: 25 }];
             } else {
                 for (let C = range.s.c; C <= range.e.c; ++C) {
-                    if (C === 0) colWidths.push({ wch: 6 }); // Sr/No
-                    else if (C === 1) colWidths.push({ wch: 13 }); // Date
-                    else colWidths.push({ wch: 14 }); // Number/Text cols
+                    if (C === 0) colWidths.push({ wch: 6 });
+                    else if (C === 1) colWidths.push({ wch: 13 });
+                    else colWidths.push({ wch: 14 });
                 }
             }
             ws['!cols'] = colWidths;
         }
 
         function exportToExcel() {
-            if (typeof XLSX === 'undefined') { alert("Excel library is loading... Please wait."); return; }
+            if (typeof XLSX === 'undefined') { 
+                alert("Excel library is loading... Please wait."); 
+                return; 
+            }
             toggleMenu(); 
-            let jobNo = document.getElementById('infoJobNo').value || "Untitled";
 
-            // 1. EXACT SUMMARY SHEET DATA (Numeric parsed)
+            let rawJobNo = document.getElementById('infoJobNo').value.trim();
+            let jobNo = rawJobNo !== "" ? rawJobNo.replace(/[/\\?%*:|"<>]/g, '-') : "Untitled";
+
             let rawPrep = parseFloat(document.getElementById('sumTotalPrep').innerText) || 0;
             let rawLoad = parseFloat(document.getElementById('sumTotalLoad').innerText) || 0;
             let rawBal = parseFloat(document.getElementById('sumCargoBalance').innerText) || 0;
@@ -1069,12 +1056,10 @@
             let wsSummary = XLSX.utils.aoa_to_sheet(summaryData);
             styleExcelSheet(wsSummary, 'summary');
 
-            // 2. PREPARATION SHEET
             let prepData = getTableDataForExcel('prepTableMain');
             let wsPrep = XLSX.utils.aoa_to_sheet(prepData);
             styleExcelSheet(wsPrep, 'prep');
 
-            // 3. LOADING SHEET
             let loadData = getTableDataForExcel('loadingTableMain');
             let wsLoad = XLSX.utils.aoa_to_sheet(loadData);
             styleExcelSheet(wsLoad, 'load');
@@ -1084,9 +1069,19 @@
             XLSX.utils.book_append_sheet(wb, wsPrep, "Preparation");
             XLSX.utils.book_append_sheet(wb, wsLoad, "Loading");
 
-            // Format Filename cleanly with safe timestamp
-            let safeDate = new Date().toISOString().slice(0, 10);
-            XLSX.writeFile(wb, `CargoLog_${jobNo}_${safeDate}.xlsx`);
+            // Binary ArrayBuffer & Blob download (Corrupt မဖြစ်စေရန်)
+            let wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+            let blob = new Blob([wbout], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+            
+            let fileName = `${jobNo}.xlsx`;
+
+            let downloadLink = document.createElement("a");
+            downloadLink.href = URL.createObjectURL(blob);
+            downloadLink.download = fileName;
+            document.body.appendChild(downloadLink);
+            downloadLink.click();
+            document.body.removeChild(downloadLink);
+            setTimeout(() => URL.revokeObjectURL(downloadLink.href), 1000);
         }
 
     </script>
