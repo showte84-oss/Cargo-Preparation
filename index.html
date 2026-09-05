@@ -105,7 +105,7 @@
         .data-section { background: white; padding: 5px; margin: 0 5px 5px 5px; overflow-x: auto; border: 1px solid #ccc; border-top: 3px solid #0b57d0; border-radius: 0 0 6px 6px; flex-grow: 1; position: relative; }
         
         .data-table { border-collapse: collapse; width: 100%; min-width: 600px; text-align: center; table-layout: fixed; }
-        .data-table th, .data-table td { border: 1px solid #555; padding: 0; height: 34px; vertical-align: middle; box-sizing: border-box; }
+        .data-table th, .data-table td { border: 1px solid #555; padding: 0; height: 32px; vertical-align: middle; box-sizing: border-box; }
         .data-table th { padding: 4px; font-size: 12px; position: relative; }
         .data-table input, .data-table select { width: 100%; height: 100%; box-sizing: border-box; border: none; text-align: center; font-size: 13px; padding: 4px; background: transparent; outline: none; }
         .data-table input:focus, .data-table select:focus { background-color: rgba(0, 123, 255, 0.1); }
@@ -124,35 +124,11 @@
         .resizer:hover, .resizer.resizing { background-color: rgba(231, 76, 60, 0.8); }
 
         .prep-th { background-color: #FFC000; color: black; font-weight: bold; }
-        
-        /* OUTPUT COLUMN & BALANCE STYLING */
-        .output-header-col { background-color: #e74c3c !important; color: white !important; font-weight: bold; }
-        .output-col { color: #d63031 !important; font-weight: bold !important; }
-        .output-cell-bg { background-color: #fff0f0; }
+        .output-col { color: red; font-weight: bold; }
         .balance-col { background-color: #00b050; color: white; font-weight: bold; }
         .load-th { background-color: #FFC000; color: black; font-weight: bold; }
-
-        /* HIGHLIGHTED TOTAL ROWS & SPECIFIC TOTAL COLORS */
-        .load-total-row { 
-            background-color: #00B0F0; 
-            color: white; 
-            font-weight: 900; 
-            font-size: 16px; 
-            letter-spacing: 0.5px;
-        }
-        .load-total-row td { 
-            height: 38px;
-            font-size: 16px; 
-            font-weight: 900;
-        }
-        
-        .prep-total-label { text-align: right; padding-right: 10px; color: #000000 !important; font-weight: 900 !important; font-size: 16px !important; }
-        .prep-total-dn { color: #000000 !important; font-weight: 900 !important; font-size: 16px !important; }
-        .prep-total-grand { color: #000000 !important; font-weight: 900 !important; font-size: 16px !important; }
-        .prep-total-output { color: #d63031 !important; font-weight: 900 !important; font-size: 16px !important; background-color: #ffe6e6 !important; }
-        .prep-total-balance { color: #00b050 !important; font-weight: 900 !important; font-size: 16px !important; background-color: #e8f8f0 !important; }
-
-        .load-green-col { background-color: #00B0F0; color: white; font-weight: 900; font-size: 16px; }
+        .load-total-row { background-color: #00B0F0; color: white; font-weight: bold; font-size: 12px; }
+        .load-green-col { background-color: #00B0F0; color: black; font-weight: bold; }
 
         .notes-section { margin-top: 10px; }
         .notes-section textarea { width: 100%; height: 80px; padding: 8px; border: 1px solid #ccc; box-sizing: border-box; font-size: 13px; font-family: inherit; }
@@ -255,7 +231,7 @@
         <button class="btn-save" id="menuSaveBtn" onclick="saveJob()">💾 SAVE TO CLOUD</button>
         <button class="btn-saveas" onclick="saveAsJob()">💾 SAVE AS...</button>
         <hr style="border: 0; border-top: 1px solid #555; width: 100%; margin: 5px 0;">
-        <button class="btn-excel" onclick="exportToExcel()">⬇ DOWNLOAD EXCEL FILE</button>
+        <button class="btn-excel" onclick="exportToExcel()">📊 EXPORT TO EXCEL</button>
         <hr style="border: 0; border-top: 1px solid #555; width: 100%; margin: 5px 0;">
         <button class="btn-backup" onclick="backupData()">⬇ LOCAL BACKUP</button>
         <button class="btn-restore" onclick="document.getElementById('restoreFile').click()">⬆ RESTORE</button>
@@ -301,17 +277,15 @@
                 <thead>
                     <tr>
                         <th class="col-no prep-th">No</th><th class="col-date prep-th">Date</th><th class="col-num prep-th">Day</th><th class="col-num prep-th">Night</th>
-                        <th class="col-num prep-th">D/N Total</th><th class="col-num prep-th">Grand Total</th><th class="col-num output-header-col">Output</th><th class="col-num balance-col" style="background-color: #00b050; color: white;">Balance</th>
+                        <th class="col-num prep-th">D/N Total</th><th class="col-num prep-th">Grand Total</th><th class="col-num output-col" style="color: white; background-color: #FFC000;">Output</th><th class="col-num balance-col" style="background-color: #FFC000; color: black;">Balance</th>
                     </tr>
                 </thead>
                 <tbody id="prepTableBody"></tbody>
                 <tfoot>
                     <tr class="load-total-row">
-                        <td colspan="4" class="prep-total-label">Total</td>
-                        <td id="prepTotalDN" class="prep-total-dn">0</td>
-                        <td id="prepGrandTotal" class="prep-total-grand">0</td>
-                        <td id="prepTotalOutput" class="prep-total-output">0</td>
-                        <td id="prepFinalBalance" class="prep-total-balance">0</td>
+                        <td colspan="4" style="text-align: right; padding-right: 10px;">Total</td>
+                        <td id="prepTotalDN">0</td><td id="prepGrandTotal">0</td>
+                        <td id="prepTotalOutput" class="output-col" style="color: white;">0</td><td id="prepFinalBalance" class="balance-col">0</td>
                     </tr>
                 </tfoot>
             </table>
@@ -336,7 +310,7 @@
                 <tbody id="loadTableBody"></tbody>
                 <tfoot id="loadTfoot">
                     <tr class="load-total-row">
-                        <td colspan="3" style="text-align: right; padding-right: 10px; color: #ffffff;">Total</td>
+                        <td colspan="3" style="text-align: right; padding-right: 10px;">Total</td>
                         <td class="std-col-truck"></td><td id="loadTotalJumbo" class="load-green-col std-col-jumbo">0</td><td id="loadTotalBags" class="load-green-col std-col-bags">0</td><td class="std-col-remark"></td>
                     </tr>
                 </tfoot>
@@ -354,7 +328,7 @@
             <h2>Summary Data</h2>
             <p>Job No: <span id="summaryJobNo" style="font-weight:bold;"></span></p>
             <ul style="font-size: 16px; line-height: 1.8;">
-                <li>Total Preparation: <span id="sumTotalPrep" style="font-weight:bold; color: #000000;">0</span></li>
+                <li>Total Preparation: <span id="sumTotalPrep" style="font-weight:bold; color: #0070c0;">0</span></li>
                 <li>Total Loading: <span id="sumTotalLoad" style="font-weight:bold; color: red;">0</span></li>
                 <li>Cargo Balance: <span id="sumCargoBalance" style="font-weight:bold; color: green;">0</span></li>
             </ul>
@@ -371,6 +345,7 @@
         let isEditMode = false; let currentMarkingBase64 = ""; 
         let stdColsState = { truck: { exists: true, name: "Truck No" }, jumbo: { exists: true, name: "Jumbo" }, bags: { exists: true, name: "50 Kgs Bags" } };
         let pressTimer;
+        
         let hasUnsavedChanges = false;
 
         document.addEventListener('input', function() { if(isAdmin) hasUnsavedChanges = true; });
@@ -388,8 +363,10 @@
         function toggleZoomMenu() {
             const actions = document.getElementById('zoomActions');
             const mainBtn = document.getElementById('zoomMainBtn');
+            
             actions.classList.toggle('show');
             mainBtn.classList.toggle('active');
+            
             if (actions.classList.contains('show')) {
                 startZoomTimer();
             } else {
@@ -408,8 +385,10 @@
         function zoomUI(step) {
             if(step === 0) { currentZoom = 1.0; } 
             else { currentZoom += step; }
+            
             if(currentZoom < 0.5) currentZoom = 0.5;
             if(currentZoom > 2.5) currentZoom = 2.5;
+            
             document.querySelectorAll('.data-table').forEach(el => {
                 el.style.zoom = currentZoom;
                 el.style.transformOrigin = "top left";
@@ -606,36 +585,15 @@
         function handleDateFocus(el) { if(!isAdmin) return; let val = el.value; if(val && val.includes('/')) { let parts = val.split('/'); if(parts.length === 3) { el.type = 'date'; el.value = `${parts[2]}-${parts[1]}-${parts[0]}`; } } else { el.type = 'date'; } try { el.showPicker(); } catch(e) {} }
         function handleDateBlur(el) { if(!isAdmin) return; let val = el.value; if (val && val.includes('-')) { let parts = val.split('-'); if(parts.length === 3) { el.type = 'text'; el.value = `${parts[2]}/${parts[1]}/${parts[0]}`; } } else { el.type = 'text'; } syncOutputFromLoading(); }
 
-        function addPrepRow(data = { date: "", day: "", night: "", output: "" }) { 
-            prepRowCount++; 
-            const tbody = document.getElementById('prepTableBody'); 
-            const tr = document.createElement('tr'); 
-            tr.innerHTML = `
-                <td style="background-color: #f9f9f9;">${prepRowCount}</td>
-                <td style="background-color: #b7e1cd;"><input type="text" class="p-date" value="${data.date}" onfocus="handleDateFocus(this)" onblur="handleDateBlur(this)"></td>
-                <td><input type="number" class="p-day" value="${data.day}" onkeyup="calcPrep()" onchange="calcPrep()"></td>
-                <td><input type="number" class="p-night" value="${data.night}" onkeyup="calcPrep()" onchange="calcPrep()"></td>
-                <td class="p-dn" style="background-color: #f9f9f9;">0</td>
-                <td class="p-grand" style="background-color: #f9f9f9;">0</td>
-                <td class="output-cell-bg"><input type="number" class="p-output output-col" value="${data.output}" onkeyup="calcPrep()" onchange="calcPrep()"></td>
-                <td class="p-balance" style="font-weight:bold; color:#00b050; background-color: #f0fdf4;">0</td>`; 
-            tbody.appendChild(tr); 
-            calcPrep(); 
-        }
+        function addPrepRow(data = { date: "", day: "", night: "", output: "" }) { prepRowCount++; const tbody = document.getElementById('prepTableBody'); const tr = document.createElement('tr'); tr.innerHTML = `<td style="background-color: #f9f9f9;">${prepRowCount}</td><td style="background-color: #b7e1cd;"><input type="text" class="p-date" value="${data.date}" onfocus="handleDateFocus(this)" onblur="handleDateBlur(this)"></td><td><input type="number" class="p-day" value="${data.day}" onkeyup="calcPrep()" onchange="calcPrep()"></td><td><input type="number" class="p-night" value="${data.night}" onkeyup="calcPrep()" onchange="calcPrep()"></td><td class="p-dn" style="background-color: #f9f9f9;">0</td><td class="p-grand" style="background-color: #f9f9f9;">0</td><td><input type="number" class="p-output output-col" value="${data.output}" onkeyup="calcPrep()" onchange="calcPrep()"></td><td class="p-balance" style="font-weight:bold; color:#00b050; background-color: #f0fdf4;">0</td>`; tbody.appendChild(tr); calcPrep(); }
         function deletePrepRow() { const tbody = document.getElementById('prepTableBody'); if (tbody.children.length > 0) { tbody.removeChild(tbody.lastElementChild); prepRowCount--; calcPrep(); hasUnsavedChanges = true; } }
-        
         function calcPrep() {
-            const rows = document.getElementById('prepTableBody').getElementsByTagName('tr'); let grandTotal = 0, sumOutput = 0, sumDN = 0;
+            const rows = document.getElementById('prepTableBody').getElementsByTagName('tr'); let grandTotal = 0, sumOutput = 0;
             for (let i = 0; i < rows.length; i++) {
                 let day = parseFloat(rows[i].querySelector('.p-day').value) || 0; let night = parseFloat(rows[i].querySelector('.p-night').value) || 0; let output = parseFloat(rows[i].querySelector('.p-output').value) || 0; let dnTotal = day + night;
-                sumDN += dnTotal;
                 rows[i].querySelector('.p-dn').innerText = dnTotal > 0 ? dnTotal : ""; grandTotal += dnTotal; rows[i].querySelector('.p-grand').innerText = grandTotal > 0 ? grandTotal : ""; sumOutput += output; rows[i].querySelector('.p-balance').innerText = grandTotal - sumOutput;
             }
-            document.getElementById('prepTotalDN').innerText = sumDN;
-            document.getElementById('prepGrandTotal').innerText = grandTotal; 
-            document.getElementById('prepTotalOutput').innerText = sumOutput; 
-            document.getElementById('prepFinalBalance').innerText = grandTotal - sumOutput; 
-            updateSummary();
+            document.getElementById('prepGrandTotal').innerText = grandTotal; document.getElementById('prepTotalOutput').innerText = sumOutput; document.getElementById('prepFinalBalance').innerText = grandTotal - sumOutput; updateSummary();
         }
 
         function editStdCol(spanId) { const span = document.getElementById(spanId); if (span) { const newName = prompt("Edit column name:", span.innerText); if (newName) { span.innerText = newName; if(spanId === 'truckColName') stdColsState.truck.name = newName; if(spanId === 'jumboColName') stdColsState.jumbo.name = newName; if(spanId === 'bagsColName') stdColsState.bags.name = newName; hasUnsavedChanges = true; updateSummary(); } } }
@@ -648,7 +606,7 @@
             const prepRows = document.getElementById('prepTableBody').getElementsByTagName('tr');
             for (let i = 0; i < prepRows.length; i++) {
                 let d = prepRows[i].querySelector('.p-date').value.trim(); let outInput = prepRows[i].querySelector('.p-output');
-                if (d && loadSums.hasOwnProperty(d)) { outInput.value = loadSums[d] > 0 ? loadSums[d] : ""; outInput.setAttribute('readonly', 'true'); outInput.style.backgroundColor = '#ffd2d2'; } else { outInput.removeAttribute('readonly'); outInput.style.backgroundColor = 'transparent'; }
+                if (d && loadSums.hasOwnProperty(d)) { outInput.value = loadSums[d] > 0 ? loadSums[d] : ""; outInput.setAttribute('readonly', 'true'); outInput.style.backgroundColor = '#ffe6e6'; } else { outInput.removeAttribute('readonly'); outInput.style.backgroundColor = 'transparent'; }
             } calcPrep(); 
         }
 
@@ -673,7 +631,7 @@
             th.innerHTML = `<div style="display:flex; justify-content:space-between; align-items:center; padding: 0 2px;"><span class="col-name-span">${colName}</span><div class="col-action-btns"><button class="icon-btn" onclick="editDynCol('${colId}')">✎</button><button class="icon-btn icon-btn-del" onclick="deleteDynCol('${colId}')">✖</button></div></div>`;
             theadRow.insertBefore(th, theadRow.querySelector('.std-col-remark'));
             document.querySelectorAll('#loadTableBody tr').forEach(row => { const td = document.createElement('td'); td.className = 'dyn-col ' + colId; td.innerHTML = `<input type="text" class="l-dyn-input" data-colid="${colId}">`; row.insertBefore(td, row.querySelector('.std-col-remark')); });
-            const tfootRow = document.querySelector('#Loading tfoot tr'); const tdFoot = document.createElement('td'); tdFoot.className = 'dyn-col ' + colId; tdFoot.style.backgroundColor = "#00B0F0"; tdFoot.style.color = "white"; tdFoot.style.fontWeight = "900"; tdFoot.style.fontSize = "16px"; tfootRow.insertBefore(tdFoot, tfootRow.querySelector('.std-col-remark'));
+            const tfootRow = document.querySelector('#Loading tfoot tr'); const tdFoot = document.createElement('td'); tdFoot.className = 'dyn-col ' + colId; tdFoot.style.backgroundColor = "lime"; tfootRow.insertBefore(tdFoot, tfootRow.querySelector('.std-col-remark'));
             hasUnsavedChanges = true; initResizableColumns(); 
         }
         function editDynCol(colId) { const th = document.querySelector(`th.${colId} .col-name-span`); if (th) { const newName = prompt("Edit column name:", th.innerText); if (newName) { th.innerText = newName; hasUnsavedChanges = true; } } }
@@ -822,7 +780,7 @@
         }
 
         // ==========================================
-        // 11. ENHANCED EXPORT TO EXCEL (DIRECT WRITE FILE TO PREVENT CORRUPTION)
+        // 11. EXPORT TO EXCEL WITH EXACT STYLES (Summary Sheet Fix)
         // ==========================================
         function getTableDataForExcel(tableId) {
             let table = document.getElementById(tableId);
@@ -843,14 +801,7 @@
                 tr.querySelectorAll('td').forEach(td => {
                     if(!td.classList.contains('hidden-col') && td.style.display !== 'none') {
                         let input = td.querySelector('input, select');
-                        let rawVal = input ? input.value : td.innerText;
-                        let trimmed = (rawVal !== undefined && rawVal !== null) ? rawVal.toString().trim() : "";
-                        
-                        if (trimmed !== "" && !isNaN(trimmed)) {
-                            row.push(Number(trimmed));
-                        } else {
-                            row.push(trimmed);
-                        }
+                        row.push(input ? input.value : td.innerText);
                     }
                 });
                 data.push(row);
@@ -864,9 +815,7 @@
                     tr.querySelectorAll('td').forEach(td => {
                         if(!td.classList.contains('hidden-col') && td.style.display !== 'none') {
                             let colspan = parseInt(td.getAttribute('colspan')) || 1;
-                            let rawVal = td.innerText.trim();
-                            let cellVal = (rawVal !== "" && !isNaN(rawVal)) ? Number(rawVal) : rawVal;
-                            row.push(cellVal);
+                            row.push(td.innerText);
                             for(let i=1; i<colspan; i++) row.push(""); 
                         }
                     });
@@ -877,158 +826,91 @@
         }
 
         function styleExcelSheet(ws, sheetType) {
-            const thinBorder = { 
-                top: { style: "thin", color: { rgb: "000000" } }, 
-                bottom: { style: "thin", color: { rgb: "000000" } }, 
-                left: { style: "thin", color: { rgb: "000000" } }, 
-                right: { style: "thin", color: { rgb: "000000" } } 
-            };
-            const thickBottomBorder = { 
-                top: { style: "thin", color: { rgb: "000000" } }, 
-                bottom: { style: "double", color: { rgb: "000000" } }, 
-                left: { style: "thin", color: { rgb: "000000" } }, 
-                right: { style: "thin", color: { rgb: "000000" } } 
-            };
-
+            const borderStyle = { top: { style: "thin", color: { rgb: "000000" } }, bottom: { style: "thin", color: { rgb: "000000" } }, left: { style: "thin", color: { rgb: "000000" } }, right: { style: "thin", color: { rgb: "000000" } } };
             const range = XLSX.utils.decode_range(ws['!ref']);
-            
             for (let R = range.s.r; R <= range.e.r; ++R) {
                 for (let C = range.s.c; C <= range.e.c; ++C) {
                     let cellRef = XLSX.utils.encode_cell({c: C, r: R});
                     if (!ws[cellRef]) ws[cellRef] = { t: 's', v: '' };
 
-                    let font = { bold: false, color: { rgb: "000000" }, name: "Calibri", sz: 11 };
-                    let fill = { fgColor: { rgb: "FFFFFF" } };
-                    let border = thinBorder;
-                    let align = { horizontal: "center", vertical: "center" };
-                    let numFmt = undefined;
+                    let font = { bold: false, color: {rgb: "000000"} };
+                    let fill = null;
+                    let border = borderStyle;
 
-                    if (typeof ws[cellRef].v === 'number') {
-                        numFmt = "#,##0";
-                    }
-
-                    // 1. SUMMARY SHEET EXACT MATCH
                     if (sheetType === 'summary') {
-                        align.horizontal = "left";
-                        if (C === 0) font.bold = true;
-                        
+                        font.bold = true; // Make all summary text bold to match image
                         if (R === 0) {
-                            font.bold = true;
-                            font.sz = 14;
-                            align.horizontal = "center";
-                            border = {};
+                            if (C === 0) fill = { fgColor: { rgb: "FFC000" } }; // Yellow for Title
+                            else fill = { fgColor: { rgb: "FFFFFF" } };
+                        } else if (R >= 1 && R <= 6) {
+                            fill = { fgColor: { rgb: "D9EAD3" } }; // Light Mint Green
                         } else if (R === 7) {
-                            border = {}; // Empty Separator
-                        } else if (R >= 8) {
-                            font.bold = true; // Totals are Bold
-                            
-                            // Color logic exactly from Phone UI Summary List
-                            if(R === 8 && C === 1) font.color = { rgb: "0070C0" }; // Total Prep
-                            if(R === 9 && C === 1) font.color = { rgb: "FF0000" }; // Total Load
-                            if(R === 10 && C === 1) font.color = { rgb: "008000" }; // Cargo Balance
+                            fill = { fgColor: { rgb: "FFFFFF" } }; // Empty row 
+                            border = {}; // Remove border for empty row
+                        } else if (R === 8) {
+                            fill = { fgColor: { rgb: "3DA6F4" } }; // Light Blue
+                        } else if (R === 9) {
+                            fill = { fgColor: { rgb: "52ED52" } }; // Bright Lime Green
+                        } else if (R === 10) {
+                            fill = { fgColor: { rgb: "FF0000" } }; // Bright Red
+                        } else {
+                            fill = { fgColor: { rgb: "FFFFFF" } };
                         }
-                    } 
-                    // 2. PREPARATION SHEET EXACT MATCH
-                    else if (sheetType === 'prep') {
-                        if (R === 0) { // Header Row
+                    } else {
+                        // Standard styling for Prep & Loading Sheets
+                        if (R === 0) { 
+                            fill = { fgColor: { rgb: "FFC000" } }; // Yellow header
                             font.bold = true;
-                            if (C === 6) { fill = { fgColor: { rgb: "E74C3C" } }; font.color = { rgb: "FFFFFF" }; }
-                            else if (C === 7) { fill = { fgColor: { rgb: "00B050" } }; font.color = { rgb: "FFFFFF" }; }
-                            else { fill = { fgColor: { rgb: "FFC000" } }; }
-                        } 
-                        else if (R === range.e.r) { // Footer Row
+                        } else if (R === range.e.r) { 
+                            fill = { fgColor: { rgb: "00B0F0" } }; // Cyan total row
                             font.bold = true;
-                            font.sz = 12;
-                            border = thickBottomBorder;
-                            fill = { fgColor: { rgb: "00B0F0" } }; // Default Cyan background
-                            
-                            if (C <= 5) font.color = { rgb: "000000" }; // Total text black
-                            if (C === 6) { fill = { fgColor: { rgb: "FFE6E6" } }; font.color = { rgb: "D63031" }; } // Output 
-                            if (C === 7) { fill = { fgColor: { rgb: "E8F8F0" } }; font.color = { rgb: "00B050" }; } // Balance 
-                        } 
-                        else { // Normal Rows
-                            if (C === 0 || C === 4 || C === 5) fill = { fgColor: { rgb: "F9F9F9" } };
-                            if (C === 1) fill = { fgColor: { rgb: "B7E1CD" } }; // Date Col Greenish
-                            if (C === 6) { fill = { fgColor: { rgb: "FFF0F0" } }; font.color = { rgb: "D63031" }; font.bold = true; } // Output Cell
-                            if (C === 7) { fill = { fgColor: { rgb: "F0FDF4" } }; font.color = { rgb: "00B050" }; font.bold = true; } // Balance Cell
-                        }
-                    } 
-                    // 3. LOADING SHEET EXACT MATCH
-                    else if (sheetType === 'load') {
-                        if (R === 0) { // Header Row
-                            font.bold = true;
-                            fill = { fgColor: { rgb: "FFC000" } };
-                        } 
-                        else if (R === range.e.r) { // Footer Row
-                            font.bold = true;
-                            font.sz = 12;
-                            border = thickBottomBorder;
-                            fill = { fgColor: { rgb: "00B0F0" } };
-                            font.color = { rgb: "FFFFFF" };
-                        } 
-                        else { // Normal Rows
-                            if (C === 0) fill = { fgColor: { rgb: "F9F9F9" } };
-                            if (C === 1) fill = { fgColor: { rgb: "B7E1CD" } };
+                        } else { 
+                            fill = { fgColor: { rgb: (R % 2 === 1) ? "BDD7EE" : "F8CBAD" } }; // Alternate rows
                         }
                     }
 
-                    ws[cellRef].s = { 
-                        font: font, 
-                        fill: fill, 
-                        border: border, 
-                        alignment: align,
-                        numFmt: numFmt
-                    };
+                    ws[cellRef].s = { font: font, fill: fill, border: border, alignment: { horizontal: "center", vertical: "center" } };
                 }
             }
-
-            let colWidths = [];
+            
+            // Set Column Widths based on sheet type
+            let cols = []; 
             if (sheetType === 'summary') {
-                colWidths = [{ wch: 22 }, { wch: 25 }];
+                cols = [{wch: 25}, {wch: 25}]; // Make summary columns wider
             } else {
-                for (let C = range.s.c; C <= range.e.c; ++C) {
-                    if (C === 0) colWidths.push({ wch: 6 });
-                    else if (C === 1) colWidths.push({ wch: 13 });
-                    else colWidths.push({ wch: 14 });
-                }
+                for (let i = range.s.c; i <= range.e.c; ++i) cols.push({wch: 15});
             }
-            ws['!cols'] = colWidths;
+            ws['!cols'] = cols;
         }
 
         function exportToExcel() {
-            if (typeof XLSX === 'undefined') { 
-                alert("Excel library is loading... Please wait."); 
-                return; 
-            }
+            if (typeof XLSX === 'undefined') { alert("Excel library is loading... Please wait."); return; }
             toggleMenu(); 
+            let jobNo = document.getElementById('infoJobNo').value || "Untitled";
 
-            let rawJobNo = document.getElementById('infoJobNo').value.trim();
-            let jobNo = rawJobNo !== "" ? rawJobNo.replace(/[/\\?%*:|"<>]/g, '-') : "Untitled";
-
-            let rawPrep = parseFloat(document.getElementById('sumTotalPrep').innerText) || 0;
-            let rawLoad = parseFloat(document.getElementById('sumTotalLoad').innerText) || 0;
-            let rawBal = parseFloat(document.getElementById('sumCargoBalance').innerText) || 0;
-
+            // 1. EXACT SUMMARY SHEET DATA (Matching Image)
             let summaryData = [
-                ["CARGO LOG SUMMARY", ""],
-                ["JOB NO", document.getElementById('infoJobNo').value || ""],
-                ["SHIPPER", document.getElementById('infoShipper').value || ""],
-                ["BUYER", document.getElementById('infoBuyer').value || ""],
-                ["QUALITY", document.getElementById('infoQuality').value || ""],
-                ["QUANTITY", document.getElementById('infoQuantity').value || ""],
-                ["PLACE", document.getElementById('infoPlace').value || ""],
-                ["", ""],
-                ["Total Preparation", rawPrep],
-                ["Total Loading", rawLoad],
-                ["Cargo Balance", rawBal]
+                ["CARGO LOG SUMMARY", ""], // Row 0
+                ["JOB NO", document.getElementById('infoJobNo').value], // Row 1
+                ["SHIPPER", document.getElementById('infoShipper').value], // Row 2
+                ["BUYER", document.getElementById('infoBuyer').value], // Row 3
+                ["QUALITY", document.getElementById('infoQuality').value], // Row 4
+                ["QUANTITY", document.getElementById('infoQuantity').value], // Row 5
+                ["PLACE", document.getElementById('infoPlace').value], // Row 6
+                ["", ""], // Row 7 (Empty separator)
+                ["Total Preparation", document.getElementById('sumTotalPrep').innerText], // Row 8
+                ["Total Loading", document.getElementById('sumTotalLoad').innerText], // Row 9
+                ["Cargo Balance", document.getElementById('sumCargoBalance').innerText] // Row 10
             ];
             let wsSummary = XLSX.utils.aoa_to_sheet(summaryData);
             styleExcelSheet(wsSummary, 'summary');
 
+            // 2. PREPARATION SHEET
             let prepData = getTableDataForExcel('prepTableMain');
             let wsPrep = XLSX.utils.aoa_to_sheet(prepData);
             styleExcelSheet(wsPrep, 'prep');
 
+            // 3. LOADING SHEET
             let loadData = getTableDataForExcel('loadingTableMain');
             let wsLoad = XLSX.utils.aoa_to_sheet(loadData);
             styleExcelSheet(wsLoad, 'load');
@@ -1038,11 +920,7 @@
             XLSX.utils.book_append_sheet(wb, wsPrep, "Preparation");
             XLSX.utils.book_append_sheet(wb, wsLoad, "Loading");
 
-            // NATIVE WRITE TO FIX CORRUPTION BUG
-            // (Downloads directly without converting to Blob manually)
-            let safeDate = new Date().toISOString().slice(0, 10);
-            let fileName = `CargoLog_${jobNo}_${safeDate}.xlsx`;
-            XLSX.writeFile(wb, fileName);
+            XLSX.writeFile(wb, "CargoLog_" + jobNo + ".xlsx");
         }
 
     </script>
