@@ -255,7 +255,7 @@
         <button class="btn-save" id="menuSaveBtn" onclick="saveJob()">💾 SAVE TO CLOUD</button>
         <button class="btn-saveas" onclick="saveAsJob()">💾 SAVE AS...</button>
         <hr style="border: 0; border-top: 1px solid #555; width: 100%; margin: 5px 0;">
-        <button class="btn-excel" onclick="exportToExcel()">📊 EXPORT TO EXCEL</button>
+        <button class="btn-excel" onclick="exportToExcel()">⬇ DOWNLOAD EXCEL FILE</button>
         <hr style="border: 0; border-top: 1px solid #555; width: 100%; margin: 5px 0;">
         <button class="btn-backup" onclick="backupData()">⬇ LOCAL BACKUP</button>
         <button class="btn-restore" onclick="document.getElementById('restoreFile').click()">⬆ RESTORE</button>
@@ -822,7 +822,7 @@
         }
 
         // ==========================================
-        // 11. ENHANCED EXPORT TO EXCEL (With Explicit .xlsx & Clean Binary Download)
+        // 11. ENHANCED EXPORT TO EXCEL (DIRECT WRITE FILE TO PREVENT CORRUPTION)
         // ==========================================
         function getTableDataForExcel(tableId) {
             let table = document.getElementById(tableId);
@@ -878,10 +878,10 @@
 
         function styleExcelSheet(ws, sheetType) {
             const thinBorder = { 
-                top: { style: "thin", color: { rgb: "555555" } }, 
-                bottom: { style: "thin", color: { rgb: "555555" } }, 
-                left: { style: "thin", color: { rgb: "555555" } }, 
-                right: { style: "thin", color: { rgb: "555555" } } 
+                top: { style: "thin", color: { rgb: "000000" } }, 
+                bottom: { style: "thin", color: { rgb: "000000" } }, 
+                left: { style: "thin", color: { rgb: "000000" } }, 
+                right: { style: "thin", color: { rgb: "000000" } } 
             };
             const thickBottomBorder = { 
                 top: { style: "thin", color: { rgb: "000000" } }, 
@@ -900,103 +900,75 @@
                     let font = { bold: false, color: { rgb: "000000" }, name: "Calibri", sz: 11 };
                     let fill = { fgColor: { rgb: "FFFFFF" } };
                     let border = thinBorder;
+                    let align = { horizontal: "center", vertical: "center" };
                     let numFmt = undefined;
 
                     if (typeof ws[cellRef].v === 'number') {
                         numFmt = "#,##0";
                     }
 
+                    // 1. SUMMARY SHEET EXACT MATCH
                     if (sheetType === 'summary') {
-                        font.bold = true;
+                        align.horizontal = "left";
+                        if (C === 0) font.bold = true;
+                        
                         if (R === 0) {
-                            fill = { fgColor: { rgb: "1F4E78" } };
-                            font.color = { rgb: "FFFFFF" };
+                            font.bold = true;
                             font.sz = 14;
-                        } else if (R >= 1 && R <= 6) {
-                            if (C === 0) {
-                                fill = { fgColor: { rgb: "D9E1F2" } };
-                                font.color = { rgb: "1F4E78" };
-                            } else {
-                                fill = { fgColor: { rgb: "F2F2F2" } };
-                            }
-                        } else if (R === 7) {
-                            fill = { fgColor: { rgb: "FFFFFF" } };
+                            align.horizontal = "center";
                             border = {};
-                        } else if (R === 8) {
-                            fill = { fgColor: { rgb: "D9E1F2" } };
-                            font.color = { rgb: "000000" };
-                            font.sz = 12;
-                        } else if (R === 9) {
-                            fill = { fgColor: { rgb: "FCE4D6" } };
-                            font.color = { rgb: "C00000" };
-                            font.sz = 12;
-                        } else if (R === 10) {
-                            fill = { fgColor: { rgb: "E2EFDA" } };
-                            font.color = { rgb: "375623" };
-                            font.sz = 12;
+                        } else if (R === 7) {
+                            border = {}; // Empty Separator
+                        } else if (R >= 8) {
+                            font.bold = true; // Totals are Bold
+                            
+                            // Color logic exactly from Phone UI Summary List
+                            if(R === 8 && C === 1) font.color = { rgb: "0070C0" }; // Total Prep
+                            if(R === 9 && C === 1) font.color = { rgb: "FF0000" }; // Total Load
+                            if(R === 10 && C === 1) font.color = { rgb: "008000" }; // Cargo Balance
                         }
                     } 
+                    // 2. PREPARATION SHEET EXACT MATCH
                     else if (sheetType === 'prep') {
-                        if (R === 0) {
+                        if (R === 0) { // Header Row
                             font.bold = true;
-                            font.sz = 11;
-                            if (C === 6) { 
-                                fill = { fgColor: { rgb: "E74C3C" } };
-                                font.color = { rgb: "FFFFFF" };
-                            } else if (C === 7) { 
-                                fill = { fgColor: { rgb: "00B0F0" } };
-                                font.color = { rgb: "FFFFFF" };
-                            } else {
-                                fill = { fgColor: { rgb: "FFC000" } };
-                                font.color = { rgb: "000000" };
-                            }
-                        } else if (R === range.e.r) {
+                            if (C === 6) { fill = { fgColor: { rgb: "E74C3C" } }; font.color = { rgb: "FFFFFF" }; }
+                            else if (C === 7) { fill = { fgColor: { rgb: "00B050" } }; font.color = { rgb: "FFFFFF" }; }
+                            else { fill = { fgColor: { rgb: "FFC000" } }; }
+                        } 
+                        else if (R === range.e.r) { // Footer Row
                             font.bold = true;
                             font.sz = 12;
                             border = thickBottomBorder;
-                            fill = { fgColor: { rgb: "00B0F0" } };
-                            font.color = { rgb: "FFFFFF" };
-
-                            if (C <= 3) {
-                                font.color = { rgb: "000000" };
-                            } else if (C === 4 || C === 5) {
-                                font.color = { rgb: "000000" };
-                            } else if (C === 6) {
-                                fill = { fgColor: { rgb: "FFE6E6" } };
-                                font.color = { rgb: "D63031" };
-                            } else if (C === 7) {
-                                fill = { fgColor: { rgb: "E8F8F0" } };
-                                font.color = { rgb: "00B050" };
-                            }
-                        } else {
-                            fill = { fgColor: { rgb: (R % 2 === 1) ? "FFFFFF" : "F9F9F9" } };
-                            if (C === 1) fill = { fgColor: { rgb: "E2EFDA" } };
-                            if (C === 6) {
-                                fill = { fgColor: { rgb: "FFF0F0" } };
-                                font.color = { rgb: "D63031" };
-                                font.bold = true;
-                            }
-                            if (C === 7) {
-                                font.color = { rgb: "00B050" };
-                                font.bold = true;
-                            }
+                            fill = { fgColor: { rgb: "00B0F0" } }; // Default Cyan background
+                            
+                            if (C <= 5) font.color = { rgb: "000000" }; // Total text black
+                            if (C === 6) { fill = { fgColor: { rgb: "FFE6E6" } }; font.color = { rgb: "D63031" }; } // Output 
+                            if (C === 7) { fill = { fgColor: { rgb: "E8F8F0" } }; font.color = { rgb: "00B050" }; } // Balance 
+                        } 
+                        else { // Normal Rows
+                            if (C === 0 || C === 4 || C === 5) fill = { fgColor: { rgb: "F9F9F9" } };
+                            if (C === 1) fill = { fgColor: { rgb: "B7E1CD" } }; // Date Col Greenish
+                            if (C === 6) { fill = { fgColor: { rgb: "FFF0F0" } }; font.color = { rgb: "D63031" }; font.bold = true; } // Output Cell
+                            if (C === 7) { fill = { fgColor: { rgb: "F0FDF4" } }; font.color = { rgb: "00B050" }; font.bold = true; } // Balance Cell
                         }
                     } 
+                    // 3. LOADING SHEET EXACT MATCH
                     else if (sheetType === 'load') {
-                        if (R === 0) {
+                        if (R === 0) { // Header Row
                             font.bold = true;
-                            font.sz = 11;
                             fill = { fgColor: { rgb: "FFC000" } };
-                            font.color = { rgb: "000000" };
-                        } else if (R === range.e.r) {
+                        } 
+                        else if (R === range.e.r) { // Footer Row
                             font.bold = true;
                             font.sz = 12;
                             border = thickBottomBorder;
                             fill = { fgColor: { rgb: "00B0F0" } };
                             font.color = { rgb: "FFFFFF" };
-                        } else {
-                            fill = { fgColor: { rgb: (R % 2 === 1) ? "FFFFFF" : "F9F9F9" } };
-                            if (C === 1) fill = { fgColor: { rgb: "E2EFDA" } };
+                        } 
+                        else { // Normal Rows
+                            if (C === 0) fill = { fgColor: { rgb: "F9F9F9" } };
+                            if (C === 1) fill = { fgColor: { rgb: "B7E1CD" } };
                         }
                     }
 
@@ -1004,10 +976,7 @@
                         font: font, 
                         fill: fill, 
                         border: border, 
-                        alignment: { 
-                            horizontal: (sheetType === 'summary' && C === 0) ? "left" : "center", 
-                            vertical: "center" 
-                        },
+                        alignment: align,
                         numFmt: numFmt
                     };
                 }
@@ -1069,19 +1038,11 @@
             XLSX.utils.book_append_sheet(wb, wsPrep, "Preparation");
             XLSX.utils.book_append_sheet(wb, wsLoad, "Loading");
 
-            // Binary ArrayBuffer & Blob download (Corrupt မဖြစ်စေရန်)
-            let wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
-            let blob = new Blob([wbout], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-            
-            let fileName = `${jobNo}.xlsx`;
-
-            let downloadLink = document.createElement("a");
-            downloadLink.href = URL.createObjectURL(blob);
-            downloadLink.download = fileName;
-            document.body.appendChild(downloadLink);
-            downloadLink.click();
-            document.body.removeChild(downloadLink);
-            setTimeout(() => URL.revokeObjectURL(downloadLink.href), 1000);
+            // NATIVE WRITE TO FIX CORRUPTION BUG
+            // (Downloads directly without converting to Blob manually)
+            let safeDate = new Date().toISOString().slice(0, 10);
+            let fileName = `CargoLog_${jobNo}_${safeDate}.xlsx`;
+            XLSX.writeFile(wb, fileName);
         }
 
     </script>
