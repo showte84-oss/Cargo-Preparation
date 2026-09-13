@@ -840,7 +840,7 @@
         }
 
         // ==========================================
-        // LOCAL BACKUP WITH EXPLICIT EXTENSION & BLOB
+        // LOCAL BACKUP
         // ==========================================
         async function backupData() {
             toggleMenu(); 
@@ -899,8 +899,18 @@
         }
 
         // ==========================================
-        // 11. ENHANCED EXPORT TO EXCEL (MOBILE PWA / WEBVIEW COMPATIBLE)
+        // 11. ENHANCED EXPORT TO EXCEL (FOOLPROOF BASE64 TO UINT8ARRAY)
         // ==========================================
+        function base64ToUint8Array(base64) {
+            var raw = window.atob(base64);
+            var rawLength = raw.length;
+            var array = new Uint8Array(new ArrayBuffer(rawLength));
+            for (var i = 0; i < rawLength; i++) {
+                array[i] = raw.charCodeAt(i);
+            }
+            return array;
+        }
+
         function getTableDataForExcel(tableId) {
             let table = document.getElementById(tableId);
             let data = [];
@@ -1086,7 +1096,6 @@
             try {
                 toggleMenu(); 
 
-                // 1. Auto File Name and Sanitization
                 let rawJobNo = document.getElementById('infoJobNo').value.trim();
                 let cleanJobNo = rawJobNo !== "" ? rawJobNo.replace(/[/\\?%*:|"<>]/g, '-') : "Untitled";
                 let safeDate = new Date().toISOString().slice(0, 10);
@@ -1126,18 +1135,21 @@
                 XLSX.utils.book_append_sheet(wb, wsPrep, "Preparation");
                 XLSX.utils.book_append_sheet(wb, wsLoad, "Loading");
 
-                // 2. Explicit Application MIME Type for WebViews/PWA
-                let wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
-                let blob = new Blob([wbout], { 
-                    type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8' 
+                // 100% RELIABLE FOR MOBILE APPS / WEBVIEWS:
+                // Generate base64 first (pure ASCII, immune to UTF-8 corruption)
+                // then convert directly to binary Uint8Array
+                let b64 = XLSX.write(wb, { bookType: 'xlsx', type: 'base64' });
+                let u8Data = base64ToUint8Array(b64);
+
+                let blob = new Blob([u8Data], { 
+                    type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
                 });
                 
                 let url = window.URL.createObjectURL(blob);
                 let downloadLink = document.createElement("a");
                 downloadLink.href = url;
-                downloadLink.setAttribute("download", finalFileName);
+                downloadLink.download = finalFileName;
                 downloadLink.target = "_blank";
-                downloadLink.rel = "noopener";
                 
                 document.body.appendChild(downloadLink);
                 downloadLink.click();
@@ -1145,11 +1157,11 @@
 
                 setTimeout(() => {
                     window.URL.revokeObjectURL(url);
-                    alert(`Excel File ("${finalFileName}") ကို Download ဆွဲပြီးပါပြီ။ ✅`);
+                    alert(`Excel File ("${finalFileName}") ကို Download ဆွဲပြီးပါပြီ။`);
                 }, 400);
                 
             } catch (error) {
-                alert("Excel File ထုတ်ယူရာတွင် အမှားအယွင်းဖြစ်ပေါ်ခဲ့ပါသည်။ Error: " + error.message);
+                alert("Excel File ထုတ်ယူရာတွင် အမှားဖြစ်ပေါ်ခဲ့ပါသည်: " + error.message);
                 console.error("Export Error:", error);
             }
         }
