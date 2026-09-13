@@ -848,13 +848,15 @@
                 let jobsData = JSON.stringify(snapshot.val() || {}, null, 2); 
                 if(jobsData === "{}" || !snapshot.exists()) { alert("No data to backup."); return; }
                 
-                const blob = new Blob([jobsData], { type: "application/octet-stream" }); 
+                const blob = new Blob([jobsData], { type: "application/json;charset=utf-8" }); 
                 const url = window.URL.createObjectURL(blob); 
                 
                 const a = document.createElement("a"); 
                 a.href = url; 
                 let safeDate = new Date().toISOString().slice(0,10);
                 a.download = `CargoLog_LocalBackup_${safeDate}.json`; 
+                a.target = "_blank";
+                a.rel = "noopener";
                 
                 document.body.appendChild(a); 
                 a.click(); 
@@ -863,7 +865,7 @@
                 setTimeout(() => {
                     window.URL.revokeObjectURL(url);
                     alert("Local Backup Data ကို Download ဆွဲပြီးပါပြီ။ ဖုန်း/ကွန်ပျူတာ ထဲတွင် ဝင်ကြည့်ပါ။ ✅");
-                }, 500);
+                }, 400);
             });
         }
 
@@ -897,7 +899,7 @@
         }
 
         // ==========================================
-        // 11. ENHANCED EXPORT TO EXCEL (WITH AUTO-FIT COLUMNS)
+        // 11. ENHANCED EXPORT TO EXCEL (MOBILE PWA / WEBVIEW COMPATIBLE)
         // ==========================================
         function getTableDataForExcel(tableId) {
             let table = document.getElementById(tableId);
@@ -1052,11 +1054,9 @@
                 }
             }
 
-            // DYNAMIC COLUMN WIDTH CALCULATION
             let colWidths = [];
             for (let C = range.s.c; C <= range.e.c; ++C) {
                 let maxLen = 10; 
-                
                 for (let R = range.s.r; R <= range.e.r; ++R) {
                     let cellRef = XLSX.utils.encode_cell({c: C, r: R});
                     if (ws[cellRef] && ws[cellRef].v != null) {
@@ -1072,7 +1072,6 @@
                 } else {
                     if (maxLen > 30) maxLen = 30; 
                 }
-                
                 colWidths.push({ wch: maxLen + 2 }); 
             }
             ws['!cols'] = colWidths;
@@ -1087,8 +1086,11 @@
             try {
                 toggleMenu(); 
 
+                // 1. Auto File Name and Sanitization
                 let rawJobNo = document.getElementById('infoJobNo').value.trim();
-                let jobNo = rawJobNo !== "" ? rawJobNo.replace(/[/\\?%*:|"<>]/g, '-') : "Untitled";
+                let cleanJobNo = rawJobNo !== "" ? rawJobNo.replace(/[/\\?%*:|"<>]/g, '-') : "Untitled";
+                let safeDate = new Date().toISOString().slice(0, 10);
+                let finalFileName = `CargoLog_${cleanJobNo}_${safeDate}.xlsx`;
 
                 let rawPrep = parseFloat(document.getElementById('sumTotalPrep').innerText) || 0;
                 let rawLoad = parseFloat(document.getElementById('sumTotalLoad').innerText) || 0;
@@ -1124,25 +1126,27 @@
                 XLSX.utils.book_append_sheet(wb, wsPrep, "Preparation");
                 XLSX.utils.book_append_sheet(wb, wsLoad, "Loading");
 
-                let safeDate = new Date().toISOString().slice(0, 10);
-                let fileName = `CargoLog_${jobNo}_${safeDate}.xlsx`;
-
+                // 2. Explicit Application MIME Type for WebViews/PWA
                 let wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
-                let blob = new Blob([wbout], { type: 'application/octet-stream' });
-                let url = window.URL.createObjectURL(blob);
+                let blob = new Blob([wbout], { 
+                    type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8' 
+                });
                 
+                let url = window.URL.createObjectURL(blob);
                 let downloadLink = document.createElement("a");
                 downloadLink.href = url;
-                downloadLink.download = fileName;
+                downloadLink.setAttribute("download", finalFileName);
+                downloadLink.target = "_blank";
+                downloadLink.rel = "noopener";
+                
                 document.body.appendChild(downloadLink);
                 downloadLink.click();
                 document.body.removeChild(downloadLink);
-                
-                // Use setTimeout to ensure alert doesn't block download
+
                 setTimeout(() => {
                     window.URL.revokeObjectURL(url);
-                    alert("Excel File ကို Download ဆွဲပြီးပါပြီ။ ဖုန်း/ကွန်ပျူတာ ထဲတွင် ဝင်ကြည့်ပါ။ ✅");
-                }, 500);
+                    alert(`Excel File ("${finalFileName}") ကို Download ဆွဲပြီးပါပြီ။ ✅`);
+                }, 400);
                 
             } catch (error) {
                 alert("Excel File ထုတ်ယူရာတွင် အမှားအယွင်းဖြစ်ပေါ်ခဲ့ပါသည်။ Error: " + error.message);
