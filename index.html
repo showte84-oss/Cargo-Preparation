@@ -64,8 +64,7 @@
         .btn-new { background-color: #27ae60; }
         .btn-save { background-color: #2980b9; }
         .btn-saveas { background-color: #8e44ad; }
-        .btn-excel { background-color: #1abc9c; }
-        .btn-excel-tg { background-color: #2980b9; }
+        .btn-excel-tg { background-color: #1abc9c; }
         .btn-backup { background-color: #f39c12; }
         .btn-backup-tg { background-color: #3498db; }
         .btn-restore { background-color: #d35400; }
@@ -176,11 +175,14 @@
         .zoom-actions button { background: #2c3e50; color: white; border: 2px solid white; width: 40px; height: 40px; border-radius: 50%; font-size: 16px; font-weight: bold; box-shadow: 0 4px 8px rgba(0,0,0,0.3); cursor: pointer; display: flex; justify-content: center; align-items: center; transition: background 0.2s; }
         .zoom-actions button:active { background: #34495e; transform: scale(0.95); }
 
-        /* VIEWER MODE RESTRICTIONS */
+        /* VIEWER MODE RESTRICTIONS (Hides Admin & Export Actions) */
         body.viewer-mode .btn-add, body.viewer-mode .btn-delete, body.viewer-mode .top-action-bar,
         body.viewer-mode .btn-new, body.viewer-mode .btn-save, body.viewer-mode .btn-saveas,
+        body.viewer-mode .btn-excel-tg, body.viewer-mode #btnExcelTg,
+        body.viewer-mode .btn-backup, body.viewer-mode .btn-backup-tg, body.viewer-mode .btn-restore,
         body.viewer-mode #removeMarkingBtn, body.viewer-mode #settingsIconBtn,
         body.viewer-mode #shareBtn, body.viewer-mode #jobActionBtns { display: none !important; }
+        
         body.viewer-mode .info-input, body.viewer-mode .data-table input, body.viewer-mode .data-table select, body.viewer-mode .notes-section textarea { pointer-events: none; color: #000; -webkit-appearance: none; -moz-appearance: none; appearance: none; }
         body.viewer-mode .img-upload-box { cursor: default; }
 
@@ -255,10 +257,9 @@
         <button class="btn-new" onclick="newJob()">+ NEW JOB</button>
         <button class="btn-save" id="menuSaveBtn" onclick="saveJob()">💾 SAVE TO CLOUD</button>
         <button class="btn-saveas" onclick="saveAsJob()">💾 SAVE AS...</button>
-        <hr style="border: 0; border-top: 1px solid #555; width: 100%; margin: 3px 0;">
+        <hr style="border: 0; border-top: 1px solid #555; width: 100%; margin: 5px 0;">
         <button class="btn-excel-tg" id="btnExcelTg" onclick="sendExcelToTelegram()">📤 SEND EXCEL TO TELEGRAM</button>
-        <button class="btn-excel" onclick="exportToExcel()">⬇ DOWNLOAD EXCEL (PHONE)</button>
-        <hr style="border: 0; border-top: 1px solid #555; width: 100%; margin: 3px 0;">
+        <hr style="border: 0; border-top: 1px solid #555; width: 100%; margin: 5px 0;">
         <button class="btn-backup" onclick="backupData()">⬇ LOCAL BACKUP (JSON)</button>
         <button class="btn-restore" onclick="document.getElementById('restoreFile').click()">⬆ RESTORE</button>
         <button class="btn-backup-tg" id="tgBackupBtn" onclick="telegramBackup()">☁️ TELEGRAM DB BACKUP</button>
@@ -436,24 +437,33 @@
         const db = firebase.database();
 
         // ==========================================
-        // 4. SETTINGS & AUTH
+        // 4. SETTINGS & AUTH (ADMIN / VIEWER)
         // ==========================================
         function getAdminPass() { return localStorage.getItem('adminPass') || "123456"; }
         
         function toggleAuth() {
             const authBtn = document.getElementById("authBtn");
             if (isAdmin) {
-                isAdmin = false; localStorage.removeItem('savedAdminAuth'); document.body.classList.add('viewer-mode');
-                authBtn.innerText = "🔒 Viewer"; authBtn.classList.remove('unlocked');
-                if(isEditMode) toggleTableEdit(); alert("Logged out.");
+                isAdmin = false; 
+                localStorage.removeItem('savedAdminAuth'); 
+                document.body.classList.add('viewer-mode');
+                authBtn.innerText = "🔒 Viewer"; 
+                authBtn.classList.remove('unlocked');
+                if(isEditMode) toggleTableEdit(); 
+                alert("Viewer Mode သို့ ပြောင်းလိုက်ပါပြီ။");
             } else {
                 let pass = prompt("Enter Admin Password:\n(Default: 123456)");
                 if (pass === getAdminPass()) {
-                    isAdmin = true; localStorage.setItem('savedAdminAuth', pass); document.body.classList.remove('viewer-mode');
-                    authBtn.innerText = "🔓 Admin"; authBtn.classList.add('unlocked');
+                    isAdmin = true; 
+                    localStorage.setItem('savedAdminAuth', pass); 
+                    document.body.classList.remove('viewer-mode');
+                    authBtn.innerText = "🔓 Admin"; 
+                    authBtn.classList.add('unlocked');
                     if(currentMarkingBase64) document.getElementById('removeMarkingBtn').style.display = 'inline-block';
                     alert("Welcome Admin.");
-                } else if (pass !== null) alert("Incorrect Password!");
+                } else if (pass !== null) {
+                    alert("Incorrect Password!");
+                }
             }
         }
 
@@ -496,13 +506,23 @@
             const targetJob = urlParams.get('job');
             
             if (targetJob) {
-                isAdmin = false; document.body.classList.add('viewer-mode');
-                document.getElementById('mainMenuToggle').style.display = 'none'; document.getElementById('authBtn').style.display = 'none'; document.getElementById('settingsIconBtn').style.display = 'none'; document.getElementById('jobSelector').style.display = 'none';
+                isAdmin = false; 
+                document.body.classList.add('viewer-mode');
+                document.getElementById('mainMenuToggle').style.display = 'none'; 
+                document.getElementById('authBtn').style.display = 'none'; 
+                document.getElementById('settingsIconBtn').style.display = 'none'; 
+                document.getElementById('jobSelector').style.display = 'none';
                 loadJob(targetJob);
             } else {
                 if (localStorage.getItem('savedAdminAuth') === getAdminPass()) {
-                    isAdmin = true; document.body.classList.remove('viewer-mode');
-                    const authBtn = document.getElementById('authBtn'); authBtn.innerText = "🔓 Admin"; authBtn.classList.add('unlocked');
+                    isAdmin = true; 
+                    document.body.classList.remove('viewer-mode');
+                    const authBtn = document.getElementById('authBtn'); 
+                    authBtn.innerText = "🔓 Admin"; 
+                    authBtn.classList.add('unlocked');
+                } else {
+                    isAdmin = false;
+                    document.body.classList.add('viewer-mode');
                 }
                 updateJobDropdown();
 
@@ -787,6 +807,7 @@
         }
 
         function newJob() {
+            if(!isAdmin) { alert("Admin only."); return; }
             if(hasUnsavedChanges) { if(!confirm("⚠️ You have unsaved changes! Create NEW job anyway? Data will be lost.")) return; } 
             else { if(!confirm("Create NEW job?")) return; }
             currentJobId = null; localStorage.removeItem('cargoDraftState'); localStorage.removeItem('lastActiveJob');
@@ -794,6 +815,7 @@
         }
 
         function saveJob() {
+            if(!isAdmin) { alert("Admin only."); return; }
             let jobNo = document.getElementById('infoJobNo').value.trim();
             if(!jobNo) { alert("Please enter a JOB NO to save."); return; }
             let state = getJobState();
@@ -806,10 +828,14 @@
             }).catch(e => { alert("Error saving: " + e.message); saveBtn.innerText = "💾 SAVE TO CLOUD"; });
         }
 
-        function saveAsJob() { let newJobNo = prompt("Enter new JOB NO:"); if(newJobNo) { document.getElementById('infoJobNo').value = newJobNo; saveJob(); } }
+        function saveAsJob() { 
+            if(!isAdmin) { alert("Admin only."); return; }
+            let newJobNo = prompt("Enter new JOB NO:"); 
+            if(newJobNo) { document.getElementById('infoJobNo').value = newJobNo; saveJob(); } 
+        }
 
         function renameCurrentJob() {
-            if(!currentJobId) return;
+            if(!isAdmin || !currentJobId) return;
             let newJobNo = prompt("Enter new Job No to rename:", currentJobId);
             if(newJobNo && newJobNo !== currentJobId) {
                 if(confirm("Are you sure you want to rename job '" + currentJobId + "' to '" + newJobNo + "'?")) {
@@ -829,7 +855,7 @@
         }
 
         function deleteCurrentJob() {
-            if(!currentJobId) return;
+            if(!isAdmin || !currentJobId) return;
             if(confirm("⚠️ Are you sure you want to permanently delete Job: '" + currentJobId + "'?\nThis action cannot be undone!")) {
                 let jobToDelete = currentJobId;
                 db.ref('jobs/' + jobToDelete).remove().then(() => {
@@ -845,6 +871,7 @@
         // LOCAL BACKUP
         // ==========================================
         async function backupData() {
+            if(!isAdmin) { alert("Admin only."); return; }
             toggleMenu(); 
             db.ref('jobs').once('value').then(async (snapshot) => {
                 let jobsData = JSON.stringify(snapshot.val() || {}, null, 2); 
@@ -874,11 +901,12 @@
         }
 
         async function telegramBackup() {
+            if(!isAdmin) { alert("Admin only."); return; }
             let token = localStorage.getItem('tgBotToken'); 
             let chatId = localStorage.getItem('tgChatId');
             if(!token || !chatId) { 
                 alert("⚠️ Telegram ချိတ်ဆက်ထားခြင်းမရှိသေးပါ!\n\nကျေးဇူးပြု၍ ⚙️ Settings ထဲတွင် 'Bot Token' နှင့် 'Chat ID' ကို အရင်ထည့်သွင်းပေးပါ။"); 
-                if(isAdmin) openSettings(); 
+                openSettings(); 
                 return; 
             }
 
@@ -929,7 +957,7 @@
         }
 
         // ==========================================
-        // 11. ENHANCED EXPORT & TELEGRAM DIRECT SEND
+        // 11. ENHANCED EXPORT TO EXCEL & TELEGRAM (ADMIN ONLY)
         // ==========================================
         function base64ToUint8Array(base64) {
             var raw = window.atob(base64);
@@ -988,24 +1016,28 @@
             return {
                 fileName: finalFileName,
                 cleanJobNo: cleanJobNo,
-                file: new File([u8Data], finalFileName, { type: mimeType }),
-                blob: new Blob([u8Data], { type: mimeType })
+                file: new File([u8Data], finalFileName, { type: mimeType })
             };
         }
 
         async function sendExcelToTelegram() {
+            if (!isAdmin) {
+                alert("⚠️ Admin Mode တွင်သာ Telegram သို့ ပို့ခွင့်ရှိပါသည်။\nကျေးဇူးပြု၍ Admin Password ဖြင့် အရင်ဆုံး Login ဝင်ပေးပါ။");
+                return;
+            }
+
             let token = localStorage.getItem('tgBotToken');
             let chatId = localStorage.getItem('tgChatId');
             
             if (!token || !chatId) {
                 alert("⚠️ Telegram ချိတ်ဆက်ထားခြင်းမရှိသေးပါ!\n\nကျေးဇူးပြု၍ ⚙️ Settings ထဲတွင် 'Bot Token' နှင့် 'Chat ID' ကို အရင်ဆုံး ဖြည့်သွင်းပေးပါ။");
-                if (isAdmin) openSettings();
+                openSettings();
                 return;
             }
 
             const btn = document.getElementById('btnExcelTg');
             let origText = btn.innerText;
-            btn.innerText = "⏳ SENDING...";
+            btn.innerText = "⏳ SENDING TO TELEGRAM...";
 
             try {
                 let excelObj = generateExcelWorkbook();
@@ -1021,7 +1053,7 @@
                 
                 let resData = await response.json();
                 if (resData.ok) {
-                    alert(`✅ Excel ဖိုင် ("${excelObj.fileName}") ကို Telegram သို့ အောင်မြင်စွာ ပို့ပြီးပါပြီ!\n\nTelegram Chat ထဲတွင် ဖိုင်ကို တိုက်ရိုက်ဖွင့်နိုင်ပါပြီ။`);
+                    alert(`✅ Excel ဖိုင် ("${excelObj.fileName}") ကို Telegram သို့ အောင်မြင်စွာ ပို့လိုက်ပါပြီ!\n\nTelegram Chat ထဲတွင် ဖိုင်ကို တိုက်ရိုက်ဖွင့်နိုင်ပါပြီ။`);
                     toggleMenu();
                 } else {
                     alert("⚠️ Telegram သို့ ပို့၍ မရပါ!\nအကြောင်းရင်း: " + resData.description);
@@ -1208,52 +1240,6 @@
             }
             ws['!cols'] = colWidths;
         }
-
-        async function exportToExcel() {
-            if (typeof XLSX === 'undefined') { 
-                alert("Excel library is loading... Please wait."); 
-                return; 
-            }
-            
-            try {
-                toggleMenu(); 
-                let excelObj = generateExcelWorkbook();
-
-                // Native Web Share for Mobile App
-                if (navigator.canShare && navigator.canShare({ files: [excelObj.file] })) {
-                    try {
-                        await navigator.share({
-                            files: [excelObj.file],
-                            title: excelObj.fileName,
-                            text: `Cargo Log Sheet for Job ${excelObj.cleanJobNo}`
-                        });
-                        return;
-                    } catch (shareErr) {
-                        if (shareErr.name === 'AbortError') return;
-                    }
-                }
-
-                // Fallback Anchor Download
-                let url = window.URL.createObjectURL(excelObj.blob);
-                let downloadLink = document.createElement("a");
-                downloadLink.href = url;
-                downloadLink.download = excelObj.fileName;
-                downloadLink.target = "_blank";
-                
-                document.body.appendChild(downloadLink);
-                downloadLink.click();
-                document.body.removeChild(downloadLink);
-
-                setTimeout(() => {
-                    window.URL.revokeObjectURL(url);
-                    alert(`Excel File ("${excelObj.fileName}") ကို Download ဆွဲနေပါပြီ။\nဖုန်း File Manager သို့မဟုတ် Notification တွင် ဝင်ရောက်စစ်ဆေးပါ။ ✅`);
-                }, 400);
-                
-            } catch (error) {
-                alert("Excel File ထုတ်ယူရာတွင် အမှားဖြစ်ပေါ်ခဲ့ပါသည်: " + error.message);
-            }
-        }
-
     </script>
 </body>
 </html>
