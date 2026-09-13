@@ -53,18 +53,19 @@
         .side-menu {
             position: fixed; top: 0; left: -260px; width: 220px; height: 100%;
             background-color: #34495e; padding: 20px; transition: left 0.3s ease;
-            z-index: 1000; display: flex; flex-direction: column; gap: 12px;
+            z-index: 1000; display: flex; flex-direction: column; gap: 10px;
             box-shadow: 2px 0 5px rgba(0,0,0,0.2); overflow-y: auto;
         }
         .side-menu.open { left: 0; }
-        .side-menu button { padding: 10px; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 14px; text-align: left; }
+        .side-menu button { padding: 10px; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 13px; text-align: left; }
         .side-menu button:hover { opacity: 0.9; }
-        .menu-close { background: transparent !important; color: #e74c3c !important; text-align: right !important; margin-bottom: 10px; cursor: pointer; }
+        .menu-close { background: transparent !important; color: #e74c3c !important; text-align: right !important; margin-bottom: 5px; cursor: pointer; }
         
         .btn-new { background-color: #27ae60; }
         .btn-save { background-color: #2980b9; }
         .btn-saveas { background-color: #8e44ad; }
         .btn-excel { background-color: #1abc9c; }
+        .btn-excel-tg { background-color: #2980b9; }
         .btn-backup { background-color: #f39c12; }
         .btn-backup-tg { background-color: #3498db; }
         .btn-restore { background-color: #d35400; }
@@ -235,7 +236,7 @@
             <input type="text" id="appBaseUrl" placeholder="https://yourname.github.io/cargolog/">
 
             <hr style="margin-top: 15px;">
-            <h4 style="margin:10px 0 0 0; color:#27ae60;">📱 Telegram Backup Setup</h4>
+            <h4 style="margin:10px 0 0 0; color:#27ae60;">📱 Telegram Setup</h4>
             <label>Bot Token:</label>
             <input type="text" id="tgTokenInput" placeholder="123456789:ABCDefghIJKLmn...">
             <label>Chat ID:</label>
@@ -254,12 +255,13 @@
         <button class="btn-new" onclick="newJob()">+ NEW JOB</button>
         <button class="btn-save" id="menuSaveBtn" onclick="saveJob()">💾 SAVE TO CLOUD</button>
         <button class="btn-saveas" onclick="saveAsJob()">💾 SAVE AS...</button>
-        <hr style="border: 0; border-top: 1px solid #555; width: 100%; margin: 5px 0;">
-        <button class="btn-excel" id="exportExcelBtn" onclick="exportToExcel()">📊 EXCEL FILE (EXPORT / OPEN)</button>
-        <hr style="border: 0; border-top: 1px solid #555; width: 100%; margin: 5px 0;">
-        <button class="btn-backup" onclick="backupData()">⬇ LOCAL BACKUP</button>
+        <hr style="border: 0; border-top: 1px solid #555; width: 100%; margin: 3px 0;">
+        <button class="btn-excel-tg" id="btnExcelTg" onclick="sendExcelToTelegram()">📤 SEND EXCEL TO TELEGRAM</button>
+        <button class="btn-excel" onclick="exportToExcel()">⬇ DOWNLOAD EXCEL (PHONE)</button>
+        <hr style="border: 0; border-top: 1px solid #555; width: 100%; margin: 3px 0;">
+        <button class="btn-backup" onclick="backupData()">⬇ LOCAL BACKUP (JSON)</button>
         <button class="btn-restore" onclick="document.getElementById('restoreFile').click()">⬆ RESTORE</button>
-        <button class="btn-backup-tg" id="tgBackupBtn" onclick="telegramBackup()">☁️ TELEGRAM BACKUP</button>
+        <button class="btn-backup-tg" id="tgBackupBtn" onclick="telegramBackup()">☁️ TELEGRAM DB BACKUP</button>
         <input type="file" id="restoreFile" style="display:none" accept=".json" onchange="restoreData(event)">
     </div>
     <div class="overlay" id="menuOverlay" onclick="toggleMenu()"></div>
@@ -872,13 +874,39 @@
         }
 
         async function telegramBackup() {
+            let token = localStorage.getItem('tgBotToken'); 
+            let chatId = localStorage.getItem('tgChatId');
+            if(!token || !chatId) { 
+                alert("⚠️ Telegram ချိတ်ဆက်ထားခြင်းမရှိသေးပါ!\n\nကျေးဇူးပြု၍ ⚙️ Settings ထဲတွင် 'Bot Token' နှင့် 'Chat ID' ကို အရင်ထည့်သွင်းပေးပါ။"); 
+                if(isAdmin) openSettings(); 
+                return; 
+            }
+
             db.ref('jobs').once('value').then(async (snapshot) => {
-                let jobsData = JSON.stringify(snapshot.val() || {}); if(jobsData === "{}") { alert("No data to backup."); return; }
-                let token = localStorage.getItem('tgBotToken'); let chatId = localStorage.getItem('tgChatId');
-                if(!token || !chatId) { alert("Configure Telegram Bot in Settings first."); if(isAdmin) openSettings(); return; }
-                let file = new File([jobsData], "cargo_cloud_backup.json", { type: "application/json" }); let formData = new FormData(); formData.append('chat_id', chatId); formData.append('document', file); formData.append('caption', '📦 Cargo Log Cloud Backup\n📅 Date: ' + new Date().toLocaleString());
+                let jobsData = JSON.stringify(snapshot.val() || {}); 
+                if(jobsData === "{}") { alert("No data to backup."); return; }
+
+                let file = new File([jobsData], "cargo_cloud_backup.json", { type: "application/json" }); 
+                let formData = new FormData(); 
+                formData.append('chat_id', chatId); 
+                formData.append('document', file); 
+                formData.append('caption', '📦 Cargo Log Cloud Backup\n📅 Date: ' + new Date().toLocaleString());
+                
                 let btn = document.getElementById('tgBackupBtn');
-                try { btn.innerText = "⏳ SENDING..."; let response = await fetch(`https://api.telegram.org/bot${token}/sendDocument`, { method: 'POST', body: formData }); let resData = await response.json(); if(resData.ok) { alert("Backup sent to Telegram Cloud! ☁️✅"); } else { alert("Failed: " + resData.description); } } catch(e) { alert("Network error while sending to Telegram."); } finally { btn.innerText = "☁️ TELEGRAM BACKUP"; }
+                try { 
+                    btn.innerText = "⏳ SENDING..."; 
+                    let response = await fetch(`https://api.telegram.org/bot${token}/sendDocument`, { method: 'POST', body: formData }); 
+                    let resData = await response.json(); 
+                    if(resData.ok) { 
+                        alert("Database Backup ကို Telegram သို့ အောင်မြင်စွာ ပို့လိုက်ပါပြီ! ☁️✅"); 
+                    } else { 
+                        alert("⚠️ Telegram ပို့ခြင်း မအောင်မြင်ပါ!\nအကြောင်းရင်း: " + resData.description); 
+                    } 
+                } catch(e) { 
+                    alert("⚠️ Network Error ဖြစ်နေပါသည်!\n\nမြန်မာနိုင်ငံတွင်း Telegram အသုံးပြုရန် ဖုန်းတွင် VPN ဖွင့်ထားရန် လိုအပ်ပါသည်။ VPN ဖွင့်ပြီး ပြန်လည်စမ်းသပ်ပေးပါ။"); 
+                } finally { 
+                    btn.innerText = "☁️ TELEGRAM DB BACKUP"; 
+                }
             });
         }
 
@@ -901,7 +929,7 @@
         }
 
         // ==========================================
-        // 11. ENHANCED EXPORT TO EXCEL (FOOLPROOF BASE64 TO UINT8ARRAY + NATIVE MOBILE SHARE)
+        // 11. ENHANCED EXPORT & TELEGRAM DIRECT SEND
         // ==========================================
         function base64ToUint8Array(base64) {
             var raw = window.atob(base64);
@@ -911,6 +939,98 @@
                 array[i] = raw.charCodeAt(i);
             }
             return array;
+        }
+
+        function generateExcelWorkbook() {
+            let rawJobNo = document.getElementById('infoJobNo').value.trim();
+            let cleanJobNo = rawJobNo !== "" ? rawJobNo.replace(/[/\\?%*:|"<>]/g, '-') : "Untitled";
+            let safeDate = new Date().toISOString().slice(0, 10);
+            let finalFileName = `CargoLog_${cleanJobNo}_${safeDate}.xlsx`;
+
+            let rawPrep = parseFloat(document.getElementById('sumTotalPrep').innerText) || 0;
+            let rawLoad = parseFloat(document.getElementById('sumTotalLoad').innerText) || 0;
+            let rawBal = parseFloat(document.getElementById('sumCargoBalance').innerText) || 0;
+
+            let summaryData = [
+                ["CARGO LOG SUMMARY", ""],
+                ["JOB NO", document.getElementById('infoJobNo').value || ""],
+                ["SHIPPER", document.getElementById('infoShipper').value || ""],
+                ["BUYER", document.getElementById('infoBuyer').value || ""],
+                ["QUALITY", document.getElementById('infoQuality').value || ""],
+                ["QUANTITY", document.getElementById('infoQuantity').value || ""],
+                ["PLACE", document.getElementById('infoPlace').value || ""],
+                ["", ""],
+                ["Total Preparation", rawPrep],
+                ["Total Loading", rawLoad],
+                ["Cargo Balance", rawBal]
+            ];
+            
+            let wsSummary = XLSX.utils.aoa_to_sheet(summaryData);
+            styleExcelSheet(wsSummary, 'summary');
+
+            let prepData = getTableDataForExcel('prepTableMain');
+            let wsPrep = XLSX.utils.aoa_to_sheet(prepData);
+            styleExcelSheet(wsPrep, 'prep');
+
+            let loadData = getTableDataForExcel('loadingTableMain');
+            let wsLoad = XLSX.utils.aoa_to_sheet(loadData);
+            styleExcelSheet(wsLoad, 'load');
+
+            let wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, wsSummary, "Summary");
+            XLSX.utils.book_append_sheet(wb, wsPrep, "Preparation");
+            XLSX.utils.book_append_sheet(wb, wsLoad, "Loading");
+
+            let b64 = XLSX.write(wb, { bookType: 'xlsx', type: 'base64' });
+            let u8Data = base64ToUint8Array(b64);
+            let mimeType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+
+            return {
+                fileName: finalFileName,
+                cleanJobNo: cleanJobNo,
+                file: new File([u8Data], finalFileName, { type: mimeType }),
+                blob: new Blob([u8Data], { type: mimeType })
+            };
+        }
+
+        async function sendExcelToTelegram() {
+            let token = localStorage.getItem('tgBotToken');
+            let chatId = localStorage.getItem('tgChatId');
+            
+            if (!token || !chatId) {
+                alert("⚠️ Telegram ချိတ်ဆက်ထားခြင်းမရှိသေးပါ!\n\nကျေးဇူးပြု၍ ⚙️ Settings ထဲတွင် 'Bot Token' နှင့် 'Chat ID' ကို အရင်ဆုံး ဖြည့်သွင်းပေးပါ။");
+                if (isAdmin) openSettings();
+                return;
+            }
+
+            const btn = document.getElementById('btnExcelTg');
+            let origText = btn.innerText;
+            btn.innerText = "⏳ SENDING...";
+
+            try {
+                let excelObj = generateExcelWorkbook();
+                let formData = new FormData();
+                formData.append('chat_id', chatId);
+                formData.append('document', excelObj.file);
+                formData.append('caption', `📊 Cargo Log Sheet: ${excelObj.cleanJobNo}\n📅 Date: ${new Date().toLocaleString()}`);
+
+                let response = await fetch(`https://api.telegram.org/bot${token}/sendDocument`, { 
+                    method: 'POST', 
+                    body: formData 
+                });
+                
+                let resData = await response.json();
+                if (resData.ok) {
+                    alert(`✅ Excel ဖိုင် ("${excelObj.fileName}") ကို Telegram သို့ အောင်မြင်စွာ ပို့ပြီးပါပြီ!\n\nTelegram Chat ထဲတွင် ဖိုင်ကို တိုက်ရိုက်ဖွင့်နိုင်ပါပြီ။`);
+                    toggleMenu();
+                } else {
+                    alert("⚠️ Telegram သို့ ပို့၍ မရပါ!\nအကြောင်းရင်း: " + resData.description);
+                }
+            } catch (err) {
+                alert("⚠️ Network Error ဖြစ်နေပါသည်!\n\nမြန်မာနိုင်ငံတွင်း Telegram အသုံးပြုရန် ဖုန်းတွင် VPN ဖွင့်ထားရန် လိုအပ်ပါသည်။ VPN ဖွင့်ပြီး ပြန်လည်စမ်းသပ်ပေးပါ။");
+            } finally {
+                btn.innerText = origText;
+            }
         }
 
         function getTableDataForExcel(tableId) {
@@ -1097,87 +1217,40 @@
             
             try {
                 toggleMenu(); 
+                let excelObj = generateExcelWorkbook();
 
-                let rawJobNo = document.getElementById('infoJobNo').value.trim();
-                let cleanJobNo = rawJobNo !== "" ? rawJobNo.replace(/[/\\?%*:|"<>]/g, '-') : "Untitled";
-                let safeDate = new Date().toISOString().slice(0, 10);
-                let finalFileName = `CargoLog_${cleanJobNo}_${safeDate}.xlsx`;
-
-                let rawPrep = parseFloat(document.getElementById('sumTotalPrep').innerText) || 0;
-                let rawLoad = parseFloat(document.getElementById('sumTotalLoad').innerText) || 0;
-                let rawBal = parseFloat(document.getElementById('sumCargoBalance').innerText) || 0;
-
-                let summaryData = [
-                    ["CARGO LOG SUMMARY", ""],
-                    ["JOB NO", document.getElementById('infoJobNo').value || ""],
-                    ["SHIPPER", document.getElementById('infoShipper').value || ""],
-                    ["BUYER", document.getElementById('infoBuyer').value || ""],
-                    ["QUALITY", document.getElementById('infoQuality').value || ""],
-                    ["QUANTITY", document.getElementById('infoQuantity').value || ""],
-                    ["PLACE", document.getElementById('infoPlace').value || ""],
-                    ["", ""],
-                    ["Total Preparation", rawPrep],
-                    ["Total Loading", rawLoad],
-                    ["Cargo Balance", rawBal]
-                ];
-                
-                let wsSummary = XLSX.utils.aoa_to_sheet(summaryData);
-                styleExcelSheet(wsSummary, 'summary');
-
-                let prepData = getTableDataForExcel('prepTableMain');
-                let wsPrep = XLSX.utils.aoa_to_sheet(prepData);
-                styleExcelSheet(wsPrep, 'prep');
-
-                let loadData = getTableDataForExcel('loadingTableMain');
-                let wsLoad = XLSX.utils.aoa_to_sheet(loadData);
-                styleExcelSheet(wsLoad, 'load');
-
-                let wb = XLSX.utils.book_new();
-                XLSX.utils.book_append_sheet(wb, wsSummary, "Summary");
-                XLSX.utils.book_append_sheet(wb, wsPrep, "Preparation");
-                XLSX.utils.book_append_sheet(wb, wsLoad, "Loading");
-
-                // Generate clean binary Uint8Array from base64
-                let b64 = XLSX.write(wb, { bookType: 'xlsx', type: 'base64' });
-                let u8Data = base64ToUint8Array(b64);
-                let mimeType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
-
-                // Create official File object
-                const excelFile = new File([u8Data], finalFileName, { type: mimeType });
-
-                // 1. Check Mobile Native Share (Works inside AppMySite, Android WebViews, PWA)
-                if (navigator.canShare && navigator.canShare({ files: [excelFile] })) {
+                // Native Web Share for Mobile App
+                if (navigator.canShare && navigator.canShare({ files: [excelObj.file] })) {
                     try {
                         await navigator.share({
-                            files: [excelFile],
-                            title: finalFileName,
-                            text: `Cargo Log Sheet for Job ${cleanJobNo}`
+                            files: [excelObj.file],
+                            title: excelObj.fileName,
+                            text: `Cargo Log Sheet for Job ${excelObj.cleanJobNo}`
                         });
-                        return; // Successfully shared to WPS / Files / WhatsApp / Telegram
+                        return;
                     } catch (shareErr) {
-                        if (shareErr.name === 'AbortError') return; // User closed share popup
+                        if (shareErr.name === 'AbortError') return;
                     }
                 }
 
-                // 2. Fallback to standard Anchor Download for normal browsers
-                let blob = new Blob([u8Data], { type: mimeType });
-                let url = window.URL.createObjectURL(blob);
+                // Fallback Anchor Download
+                let url = window.URL.createObjectURL(excelObj.blob);
                 let downloadLink = document.createElement("a");
                 downloadLink.href = url;
-                downloadLink.setAttribute("download", finalFileName);
+                downloadLink.download = excelObj.fileName;
                 downloadLink.target = "_blank";
+                
                 document.body.appendChild(downloadLink);
                 downloadLink.click();
                 document.body.removeChild(downloadLink);
 
                 setTimeout(() => {
                     window.URL.revokeObjectURL(url);
-                    alert(`Excel File ("${finalFileName}") ကို Download စတင်ဆွဲနေပါပြီ။\nဖုန်း File Manager / Notifications တွင် စစ်ဆေးပါ။ ✅`);
-                }, 500);
+                    alert(`Excel File ("${excelObj.fileName}") ကို Download ဆွဲနေပါပြီ။\nဖုန်း File Manager သို့မဟုတ် Notification တွင် ဝင်ရောက်စစ်ဆေးပါ။ ✅`);
+                }, 400);
                 
             } catch (error) {
                 alert("Excel File ထုတ်ယူရာတွင် အမှားဖြစ်ပေါ်ခဲ့ပါသည်: " + error.message);
-                console.error("Export Error:", error);
             }
         }
 
