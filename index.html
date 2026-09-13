@@ -656,7 +656,6 @@
             const prepRows = document.getElementById('prepTableBody').getElementsByTagName('tr');
             let processedDates = {};
 
-            // 1. Sync matching dates and clear removed dates
             for (let i = 0; i < prepRows.length; i++) {
                 let d = prepRows[i].querySelector('.p-date').value.trim();
                 let outInput = prepRows[i].querySelector('.p-output');
@@ -673,7 +672,6 @@
                 }
             }
             
-            // 2. Auto-fill empty rows or Add new row for missing dates in Preparation
             for (let d in loadSums) {
                 if (!processedDates[d]) {
                     let emptyRowFound = false;
@@ -705,7 +703,6 @@
                     }
                 }
             }
-            
             calcPrep(); 
         }
 
@@ -717,7 +714,6 @@
             html += `<td class="std-col-remark"><input type="text" class="l-remark" value="${data.remarks || ''}" style="text-align: left; padding-left: 5px;"></td>`; tr.innerHTML = html; tbody.appendChild(tr); calcLoad();
         }
         function deleteLoadRow() { const tbody = document.getElementById('loadTableBody'); if (tbody.children.length > 0) { tbody.removeChild(tbody.lastElementChild); loadRowCount--; hasUnsavedChanges = true; calcLoad(); } }
-        
         function calcLoad() {
             const rows = document.getElementById('loadTableBody').getElementsByTagName('tr'); let sumJumbo = 0, sumBags = 0;
             for (let i = 0; i < rows.length; i++) { if(stdColsState.jumbo.exists) sumJumbo += parseFloat(rows[i].querySelector('.l-jumbo').value) || 0; if(stdColsState.bags.exists) sumBags += parseFloat(rows[i].querySelector('.l-bags').value) || 0; }
@@ -843,10 +839,31 @@
             }
         }
 
+        // ==========================================
+        // LOCAL BACKUP WITH EXPLICIT EXTENSION & BLOB
+        // ==========================================
         async function backupData() {
+            toggleMenu(); 
             db.ref('jobs').once('value').then(snapshot => {
-                let jobsData = JSON.stringify(snapshot.val() || {}); if(jobsData === "{}") { alert("No data to backup."); return; }
-                const blob = new Blob([jobsData], { type: "application/json" }); const url = URL.createObjectURL(blob); const a = document.createElement("a"); a.href = url; a.download = "cargo_jobs_cloud_backup_" + new Date().toISOString().slice(0,10) + ".json"; document.body.appendChild(a); a.click(); document.body.removeChild(a);
+                let jobsData = JSON.stringify(snapshot.val() || {}, null, 2); 
+                if(jobsData === "{}" || !snapshot.exists()) { alert("No data to backup."); return; }
+                
+                const blob = new Blob([jobsData], { type: "application/octet-stream" }); 
+                const url = window.URL.createObjectURL(blob); 
+                
+                const a = document.createElement("a"); 
+                a.href = url; 
+                let safeDate = new Date().toISOString().slice(0,10);
+                a.download = `CargoLog_LocalBackup_${safeDate}.json`; 
+                
+                document.body.appendChild(a); 
+                a.click(); 
+                document.body.removeChild(a);
+                
+                setTimeout(() => {
+                    window.URL.revokeObjectURL(url);
+                    alert("Local Backup Data ကို Download ဆွဲပြီးပါပြီ။ ဖုန်း/ကွန်ပျူတာ ထဲတွင် ဝင်ကြည့်ပါ။ ✅");
+                }, 500);
             });
         }
 
@@ -880,7 +897,7 @@
         }
 
         // ==========================================
-        // 11. ENHANCED EXPORT TO EXCEL (DIRECT WRITE FILE TO PREVENT CORRUPTION)
+        // 11. ENHANCED EXPORT TO EXCEL (WITH AUTO-FIT COLUMNS)
         // ==========================================
         function getTableDataForExcel(tableId) {
             let table = document.getElementById(tableId);
@@ -965,7 +982,6 @@
                         numFmt = "#,##0";
                     }
 
-                    // 1. SUMMARY SHEET EXACT MATCH
                     if (sheetType === 'summary') {
                         align.horizontal = "left";
                         if (C === 0) font.bold = true;
@@ -976,55 +992,51 @@
                             align.horizontal = "center";
                             border = {};
                         } else if (R === 7) {
-                            border = {}; // Empty Separator
+                            border = {};
                         } else if (R >= 8) {
-                            font.bold = true; // Totals are Bold
-                            
-                            // Color logic exactly from Phone UI Summary List
-                            if(R === 8 && C === 1) font.color = { rgb: "0070C0" }; // Total Prep
-                            if(R === 9 && C === 1) font.color = { rgb: "FF0000" }; // Total Load
-                            if(R === 10 && C === 1) font.color = { rgb: "008000" }; // Cargo Balance
+                            font.bold = true;
+                            if(R === 8 && C === 1) font.color = { rgb: "0070C0" }; 
+                            if(R === 9 && C === 1) font.color = { rgb: "FF0000" }; 
+                            if(R === 10 && C === 1) font.color = { rgb: "008000" }; 
                         }
                     } 
-                    // 2. PREPARATION SHEET EXACT MATCH
                     else if (sheetType === 'prep') {
-                        if (R === 0) { // Header Row
+                        if (R === 0) { 
                             font.bold = true;
                             if (C === 6) { fill = { fgColor: { rgb: "E74C3C" } }; font.color = { rgb: "FFFFFF" }; }
                             else if (C === 7) { fill = { fgColor: { rgb: "00B050" } }; font.color = { rgb: "FFFFFF" }; }
                             else { fill = { fgColor: { rgb: "FFC000" } }; }
                         } 
-                        else if (R === range.e.r) { // Footer Row
+                        else if (R === range.e.r) { 
                             font.bold = true;
                             font.sz = 12;
                             border = thickBottomBorder;
-                            fill = { fgColor: { rgb: "00B0F0" } }; // Default Cyan background
+                            fill = { fgColor: { rgb: "00B0F0" } }; 
                             
-                            if (C <= 5) font.color = { rgb: "000000" }; // Total text black
-                            if (C === 6) { fill = { fgColor: { rgb: "FFE6E6" } }; font.color = { rgb: "D63031" }; } // Output 
-                            if (C === 7) { fill = { fgColor: { rgb: "E8F8F0" } }; font.color = { rgb: "00B050" }; } // Balance 
+                            if (C <= 5) font.color = { rgb: "000000" }; 
+                            if (C === 6) { fill = { fgColor: { rgb: "FFE6E6" } }; font.color = { rgb: "D63031" }; } 
+                            if (C === 7) { fill = { fgColor: { rgb: "E8F8F0" } }; font.color = { rgb: "00B050" }; } 
                         } 
-                        else { // Normal Rows
+                        else { 
                             if (C === 0 || C === 4 || C === 5) fill = { fgColor: { rgb: "F9F9F9" } };
-                            if (C === 1) fill = { fgColor: { rgb: "B7E1CD" } }; // Date Col Greenish
-                            if (C === 6) { fill = { fgColor: { rgb: "FFF0F0" } }; font.color = { rgb: "D63031" }; font.bold = true; } // Output Cell
-                            if (C === 7) { fill = { fgColor: { rgb: "F0FDF4" } }; font.color = { rgb: "00B050" }; font.bold = true; } // Balance Cell
+                            if (C === 1) fill = { fgColor: { rgb: "B7E1CD" } }; 
+                            if (C === 6) { fill = { fgColor: { rgb: "FFF0F0" } }; font.color = { rgb: "D63031" }; font.bold = true; } 
+                            if (C === 7) { fill = { fgColor: { rgb: "F0FDF4" } }; font.color = { rgb: "00B050" }; font.bold = true; } 
                         }
                     } 
-                    // 3. LOADING SHEET EXACT MATCH
                     else if (sheetType === 'load') {
-                        if (R === 0) { // Header Row
+                        if (R === 0) { 
                             font.bold = true;
                             fill = { fgColor: { rgb: "FFC000" } };
                         } 
-                        else if (R === range.e.r) { // Footer Row
+                        else if (R === range.e.r) { 
                             font.bold = true;
                             font.sz = 12;
                             border = thickBottomBorder;
                             fill = { fgColor: { rgb: "00B0F0" } };
                             font.color = { rgb: "FFFFFF" };
                         } 
-                        else { // Normal Rows
+                        else { 
                             if (C === 0) fill = { fgColor: { rgb: "F9F9F9" } };
                             if (C === 1) fill = { fgColor: { rgb: "B7E1CD" } };
                         }
@@ -1040,15 +1052,28 @@
                 }
             }
 
+            // DYNAMIC COLUMN WIDTH CALCULATION
             let colWidths = [];
-            if (sheetType === 'summary') {
-                colWidths = [{ wch: 22 }, { wch: 25 }];
-            } else {
-                for (let C = range.s.c; C <= range.e.c; ++C) {
-                    if (C === 0) colWidths.push({ wch: 6 });
-                    else if (C === 1) colWidths.push({ wch: 13 });
-                    else colWidths.push({ wch: 14 });
+            for (let C = range.s.c; C <= range.e.c; ++C) {
+                let maxLen = 10; 
+                
+                for (let R = range.s.r; R <= range.e.r; ++R) {
+                    let cellRef = XLSX.utils.encode_cell({c: C, r: R});
+                    if (ws[cellRef] && ws[cellRef].v != null) {
+                        let valLen = ws[cellRef].v.toString().length;
+                        if (typeof ws[cellRef].v === 'number') valLen += 3;
+                        if (valLen > maxLen) maxLen = valLen;
+                    }
                 }
+                
+                if (sheetType === 'summary') {
+                    if (C === 0 && maxLen < 22) maxLen = 22;
+                    if (C === 1 && maxLen < 25) maxLen = 25;
+                } else {
+                    if (maxLen > 30) maxLen = 30; 
+                }
+                
+                colWidths.push({ wch: maxLen + 2 }); 
             }
             ws['!cols'] = colWidths;
         }
@@ -1058,49 +1083,71 @@
                 alert("Excel library is loading... Please wait."); 
                 return; 
             }
-            toggleMenu(); 
+            
+            try {
+                toggleMenu(); 
 
-            let rawJobNo = document.getElementById('infoJobNo').value.trim();
-            let jobNo = rawJobNo !== "" ? rawJobNo.replace(/[/\\?%*:|"<>]/g, '-') : "Untitled";
+                let rawJobNo = document.getElementById('infoJobNo').value.trim();
+                let jobNo = rawJobNo !== "" ? rawJobNo.replace(/[/\\?%*:|"<>]/g, '-') : "Untitled";
 
-            let rawPrep = parseFloat(document.getElementById('sumTotalPrep').innerText) || 0;
-            let rawLoad = parseFloat(document.getElementById('sumTotalLoad').innerText) || 0;
-            let rawBal = parseFloat(document.getElementById('sumCargoBalance').innerText) || 0;
+                let rawPrep = parseFloat(document.getElementById('sumTotalPrep').innerText) || 0;
+                let rawLoad = parseFloat(document.getElementById('sumTotalLoad').innerText) || 0;
+                let rawBal = parseFloat(document.getElementById('sumCargoBalance').innerText) || 0;
 
-            let summaryData = [
-                ["CARGO LOG SUMMARY", ""],
-                ["JOB NO", document.getElementById('infoJobNo').value || ""],
-                ["SHIPPER", document.getElementById('infoShipper').value || ""],
-                ["BUYER", document.getElementById('infoBuyer').value || ""],
-                ["QUALITY", document.getElementById('infoQuality').value || ""],
-                ["QUANTITY", document.getElementById('infoQuantity').value || ""],
-                ["PLACE", document.getElementById('infoPlace').value || ""],
-                ["", ""],
-                ["Total Preparation", rawPrep],
-                ["Total Loading", rawLoad],
-                ["Cargo Balance", rawBal]
-            ];
-            let wsSummary = XLSX.utils.aoa_to_sheet(summaryData);
-            styleExcelSheet(wsSummary, 'summary');
+                let summaryData = [
+                    ["CARGO LOG SUMMARY", ""],
+                    ["JOB NO", document.getElementById('infoJobNo').value || ""],
+                    ["SHIPPER", document.getElementById('infoShipper').value || ""],
+                    ["BUYER", document.getElementById('infoBuyer').value || ""],
+                    ["QUALITY", document.getElementById('infoQuality').value || ""],
+                    ["QUANTITY", document.getElementById('infoQuantity').value || ""],
+                    ["PLACE", document.getElementById('infoPlace').value || ""],
+                    ["", ""],
+                    ["Total Preparation", rawPrep],
+                    ["Total Loading", rawLoad],
+                    ["Cargo Balance", rawBal]
+                ];
+                
+                let wsSummary = XLSX.utils.aoa_to_sheet(summaryData);
+                styleExcelSheet(wsSummary, 'summary');
 
-            let prepData = getTableDataForExcel('prepTableMain');
-            let wsPrep = XLSX.utils.aoa_to_sheet(prepData);
-            styleExcelSheet(wsPrep, 'prep');
+                let prepData = getTableDataForExcel('prepTableMain');
+                let wsPrep = XLSX.utils.aoa_to_sheet(prepData);
+                styleExcelSheet(wsPrep, 'prep');
 
-            let loadData = getTableDataForExcel('loadingTableMain');
-            let wsLoad = XLSX.utils.aoa_to_sheet(loadData);
-            styleExcelSheet(wsLoad, 'load');
+                let loadData = getTableDataForExcel('loadingTableMain');
+                let wsLoad = XLSX.utils.aoa_to_sheet(loadData);
+                styleExcelSheet(wsLoad, 'load');
 
-            let wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, wsSummary, "Summary");
-            XLSX.utils.book_append_sheet(wb, wsPrep, "Preparation");
-            XLSX.utils.book_append_sheet(wb, wsLoad, "Loading");
+                let wb = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(wb, wsSummary, "Summary");
+                XLSX.utils.book_append_sheet(wb, wsPrep, "Preparation");
+                XLSX.utils.book_append_sheet(wb, wsLoad, "Loading");
 
-            // NATIVE WRITE TO FIX CORRUPTION BUG
-            // (Downloads directly without converting to Blob manually)
-            let safeDate = new Date().toISOString().slice(0, 10);
-            let fileName = `CargoLog_${jobNo}_${safeDate}.xlsx`;
-            XLSX.writeFile(wb, fileName);
+                let safeDate = new Date().toISOString().slice(0, 10);
+                let fileName = `CargoLog_${jobNo}_${safeDate}.xlsx`;
+
+                let wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+                let blob = new Blob([wbout], { type: 'application/octet-stream' });
+                let url = window.URL.createObjectURL(blob);
+                
+                let downloadLink = document.createElement("a");
+                downloadLink.href = url;
+                downloadLink.download = fileName;
+                document.body.appendChild(downloadLink);
+                downloadLink.click();
+                document.body.removeChild(downloadLink);
+                
+                // Use setTimeout to ensure alert doesn't block download
+                setTimeout(() => {
+                    window.URL.revokeObjectURL(url);
+                    alert("Excel File ကို Download ဆွဲပြီးပါပြီ။ ဖုန်း/ကွန်ပျူတာ ထဲတွင် ဝင်ကြည့်ပါ။ ✅");
+                }, 500);
+                
+            } catch (error) {
+                alert("Excel File ထုတ်ယူရာတွင် အမှားအယွင်းဖြစ်ပေါ်ခဲ့ပါသည်။ Error: " + error.message);
+                console.error("Export Error:", error);
+            }
         }
 
     </script>
