@@ -255,7 +255,7 @@
         <button class="btn-save" id="menuSaveBtn" onclick="saveJob()">💾 SAVE TO CLOUD</button>
         <button class="btn-saveas" onclick="saveAsJob()">💾 SAVE AS...</button>
         <hr style="border: 0; border-top: 1px solid #555; width: 100%; margin: 5px 0;">
-        <button class="btn-excel" onclick="exportToExcel()">⬇ DOWNLOAD EXCEL FILE</button>
+        <button class="btn-excel" id="exportExcelBtn" onclick="exportToExcel()">📊 EXCEL FILE (EXPORT / OPEN)</button>
         <hr style="border: 0; border-top: 1px solid #555; width: 100%; margin: 5px 0;">
         <button class="btn-backup" onclick="backupData()">⬇ LOCAL BACKUP</button>
         <button class="btn-restore" onclick="document.getElementById('restoreFile').click()">⬆ RESTORE</button>
@@ -844,28 +844,30 @@
         // ==========================================
         async function backupData() {
             toggleMenu(); 
-            db.ref('jobs').once('value').then(snapshot => {
+            db.ref('jobs').once('value').then(async (snapshot) => {
                 let jobsData = JSON.stringify(snapshot.val() || {}, null, 2); 
                 if(jobsData === "{}" || !snapshot.exists()) { alert("No data to backup."); return; }
                 
-                const blob = new Blob([jobsData], { type: "application/json;charset=utf-8" }); 
+                let safeDate = new Date().toISOString().slice(0,10);
+                let fileName = `CargoLog_LocalBackup_${safeDate}.json`;
+                const file = new File([jobsData], fileName, { type: "application/json" });
+
+                if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                    try {
+                        await navigator.share({ files: [file], title: fileName });
+                        return;
+                    } catch (e) {}
+                }
+
+                const blob = new Blob([jobsData], { type: "application/octet-stream" }); 
                 const url = window.URL.createObjectURL(blob); 
-                
                 const a = document.createElement("a"); 
                 a.href = url; 
-                let safeDate = new Date().toISOString().slice(0,10);
-                a.download = `CargoLog_LocalBackup_${safeDate}.json`; 
-                a.target = "_blank";
-                a.rel = "noopener";
-                
+                a.download = fileName; 
                 document.body.appendChild(a); 
                 a.click(); 
                 document.body.removeChild(a);
-                
-                setTimeout(() => {
-                    window.URL.revokeObjectURL(url);
-                    alert("Local Backup Data ကို Download ဆွဲပြီးပါပြီ။ ဖုန်း/ကွန်ပျူတာ ထဲတွင် ဝင်ကြည့်ပါ။ ✅");
-                }, 400);
+                setTimeout(() => window.URL.revokeObjectURL(url), 1000);
             });
         }
 
@@ -899,7 +901,7 @@
         }
 
         // ==========================================
-        // 11. ENHANCED EXPORT TO EXCEL (FOOLPROOF BASE64 TO UINT8ARRAY)
+        // 11. ENHANCED EXPORT TO EXCEL (FOOLPROOF BASE64 TO UINT8ARRAY + NATIVE MOBILE SHARE)
         // ==========================================
         function base64ToUint8Array(base64) {
             var raw = window.atob(base64);
@@ -1087,7 +1089,7 @@
             ws['!cols'] = colWidths;
         }
 
-        function exportToExcel() {
+        async function exportToExcel() {
             if (typeof XLSX === 'undefined') { 
                 alert("Excel library is loading... Please wait."); 
                 return; 
@@ -1135,30 +1137,43 @@
                 XLSX.utils.book_append_sheet(wb, wsPrep, "Preparation");
                 XLSX.utils.book_append_sheet(wb, wsLoad, "Loading");
 
-                // 100% RELIABLE FOR MOBILE APPS / WEBVIEWS:
-                // Generate base64 first (pure ASCII, immune to UTF-8 corruption)
-                // then convert directly to binary Uint8Array
+                // Generate clean binary Uint8Array from base64
                 let b64 = XLSX.write(wb, { bookType: 'xlsx', type: 'base64' });
                 let u8Data = base64ToUint8Array(b64);
+                let mimeType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
 
-                let blob = new Blob([u8Data], { 
-                    type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
-                });
-                
+                // Create official File object
+                const excelFile = new File([u8Data], finalFileName, { type: mimeType });
+
+                // 1. Check Mobile Native Share (Works inside AppMySite, Android WebViews, PWA)
+                if (navigator.canShare && navigator.canShare({ files: [excelFile] })) {
+                    try {
+                        await navigator.share({
+                            files: [excelFile],
+                            title: finalFileName,
+                            text: `Cargo Log Sheet for Job ${cleanJobNo}`
+                        });
+                        return; // Successfully shared to WPS / Files / WhatsApp / Telegram
+                    } catch (shareErr) {
+                        if (shareErr.name === 'AbortError') return; // User closed share popup
+                    }
+                }
+
+                // 2. Fallback to standard Anchor Download for normal browsers
+                let blob = new Blob([u8Data], { type: mimeType });
                 let url = window.URL.createObjectURL(blob);
                 let downloadLink = document.createElement("a");
                 downloadLink.href = url;
-                downloadLink.download = finalFileName;
+                downloadLink.setAttribute("download", finalFileName);
                 downloadLink.target = "_blank";
-                
                 document.body.appendChild(downloadLink);
                 downloadLink.click();
                 document.body.removeChild(downloadLink);
 
                 setTimeout(() => {
                     window.URL.revokeObjectURL(url);
-                    alert(`Excel File ("${finalFileName}") ကို Download ဆွဲပြီးပါပြီ။`);
-                }, 400);
+                    alert(`Excel File ("${finalFileName}") ကို Download စတင်ဆွဲနေပါပြီ။\nဖုန်း File Manager / Notifications တွင် စစ်ဆေးပါ။ ✅`);
+                }, 500);
                 
             } catch (error) {
                 alert("Excel File ထုတ်ယူရာတွင် အမှားဖြစ်ပေါ်ခဲ့ပါသည်: " + error.message);
