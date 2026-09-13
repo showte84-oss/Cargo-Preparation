@@ -257,9 +257,9 @@
         <button class="btn-new" onclick="newJob()">+ NEW JOB</button>
         <button class="btn-save" id="menuSaveBtn" onclick="saveJob()">💾 SAVE TO CLOUD</button>
         <button class="btn-saveas" onclick="saveAsJob()">💾 SAVE AS...</button>
-        <hr style="border: 0; border-top: 1px solid #555; width: 100%; margin: 5px 0;">
+        <hr style="border: 0; border-top: 1px solid #555; width: 100%; margin: 3px 0;">
         <button class="btn-excel-tg" id="btnExcelTg" onclick="sendExcelToTelegram()">📤 SEND EXCEL TO TELEGRAM</button>
-        <hr style="border: 0; border-top: 1px solid #555; width: 100%; margin: 5px 0;">
+        <hr style="border: 0; border-top: 1px solid #555; width: 100%; margin: 3px 0;">
         <button class="btn-backup" onclick="backupData()">⬇ LOCAL BACKUP (JSON)</button>
         <button class="btn-restore" onclick="document.getElementById('restoreFile').click()">⬆ RESTORE</button>
         <button class="btn-backup-tg" id="tgBackupBtn" onclick="telegramBackup()">☁️ TELEGRAM DB BACKUP</button>
@@ -957,7 +957,7 @@
         }
 
         // ==========================================
-        // 11. ENHANCED EXPORT TO EXCEL & TELEGRAM (ADMIN ONLY)
+        // 11. ENHANCED EXPORT & TELEGRAM DIRECT SEND (ADMIN ONLY)
         // ==========================================
         function base64ToUint8Array(base64) {
             var raw = window.atob(base64);
@@ -1053,7 +1053,7 @@
                 
                 let resData = await response.json();
                 if (resData.ok) {
-                    alert(`✅ Excel ဖိုင် ("${excelObj.fileName}") ကို Telegram သို့ အောင်မြင်စွာ ပို့လိုက်ပါပြီ!\n\nTelegram Chat ထဲတွင် ဖိုင်ကို တိုက်ရိုက်ဖွင့်နိုင်ပါပြီ။`);
+                    alert(`✅ Excel ဖိုင် ("${excelObj.fileName}") ကို Telegram သို့ အောင်မြင်စွာ ပို့ပြီးပါပြီ!\n\nTelegram Chat ထဲတွင် ဖိုင်ကို တိုက်ရိုက်ဖွင့်နိုင်ပါပြီ။`);
                     toggleMenu();
                 } else {
                     alert("⚠️ Telegram သို့ ပို့၍ မရပါ!\nအကြောင်းရင်း: " + resData.description);
